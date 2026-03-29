@@ -11,3 +11,61 @@
 - Added role and permission foundations for `super_admin`, `admin`, and `cashier`.
 - Added staff and permission middleware with permission-aware route protection.
 - Disabled public registration and refined staff login behavior.
+- Added implementation handoff plan at `docs/plans/2026-03-29-land-station-flexible-system.md` for evolving the repo into a flexible Land Station monolith.
+- Refactored public, admin, and POS entry routes from closures to controller-based module routes.
+- Added module-based Inertia pages for `Public/Home`, `Public/Services/Index`, `Admin/Dashboard/Index`, `Admin/Management/Index`, and `Pos/Dashboard/Index`.
+- Added protected `management.index` route and surfaced Management navigation from existing permission capabilities.
+- Added feature coverage for public route smoke tests and management access control.
+- Rebuilt Vite manifest after module page refactor and revalidated targeted feature tests plus route listing.
+- Added flexible service catalog baseline schema with `service_categories`, `services`, and `service_units` tables.
+- Added targeted schema tests to lock the first data-driven service master-data slice.
+- Added `ServiceCategory`, `Service`, and `ServiceUnit` models with explicit relations and status/type constants.
+- Added `ServiceCatalogSeeder` and wired baseline Land Station categories, services, and unit fixtures into `DatabaseSeeder`.
+- Revalidated the foundation with `migrate:fresh --seed` plus targeted route, schema, and seeder tests.
+- Added configurable pricing and booking-policy baseline tables: `service_pricing_rules` and `service_booking_policies`.
+- Added `ServicePricingRule` and `ServiceBookingPolicy` models plus relations from `Service` and `ServiceUnit`.
+- Extended `ServiceCatalogSeeder` with default timed-service pricing, unit-level override data, and booking-policy fixtures.
+- Revalidated Phase 1 with a full route + schema + seeder test suite after `migrate:fresh --seed`.
+- Converted `management.index` from static placeholder content to a data-backed read surface powered by seeded service master data.
+- Added `ManagementIndexTest` to lock summary counts and grouped category/service props for admin and super admin access.
+- Rebuilt frontend assets after the management page refactor; Node `20.10.0` warning remains non-blocking but should be upgraded later.
+- Converted `services.index` from static copy to a guest-facing, data-backed service catalog powered by seeded categories, services, pricing rules, and booking-policy readiness.
+- Added `PublicServicesIndexTest` to lock public summary/order/pricing props without requiring authentication.
+- Rebuilt frontend assets after the public catalog refactor and revalidated the expanded phase-one suite.
+- Converted `home` from static marketing cards to a guest-facing DB-backed overview using seeded category/service/unit signals.
+- Added `PublicHomeOverviewTest` to lock homepage summary and featured-service props.
+- Rebuilt frontend assets again and revalidated the expanded foundation suite after the homepage refactor.
+- Converted `dashboard` from placeholder cards to a DB-backed operational overview for admin-capable users.
+- Added `DashboardIndexTest` to lock seeded summary counts and featured category/service operational props.
+- Revalidated auth redirects, access control, public read surfaces, and database foundation after the dashboard refactor.
+- Added the first service master-data CRUD foundation under management, covering create/update for service categories and services.
+- Added admin FormRequests, controller actions, and Inertia pages for `management.services.*` while reusing the existing `manage-master-data` permission.
+- Added `ServiceCatalogTest` to lock access control, validation, create, and update flows for categories and services.
+- Extended the service catalog CRUD foundation with create/update flows for `service_units`, including timed-service-only validation and unit status enforcement.
+- Added admin service-unit routes, FormRequests, and service catalog UI sections for managing units in the same management surface.
+- Revalidated the expanded auth/access/public/database suite after the unit CRUD slice.
+- Extended the service catalog management surface with create/update CRUD for `service_pricing_rules` and `service_booking_policies`.
+- Added pricing/policy FormRequests, controller actions, validation for unit ownership + unique service booking policy, and Inertia form sections.
+- Rebuilt frontend assets and revalidated the expanded suite after the pricing/policy CRUD slice.
+- Added Phase 3 booking foundation schema for `customers`, `bookings`, and `service_sessions`.
+- Added `Customer`, `Booking`, and `ServiceSession` models plus new relations on `Service`, `ServiceUnit`, and `User`.
+- Rebuilt the database with `migrate:fresh --seed` and revalidated the expanded suite after the booking foundation slice.
+- Added `TimedServiceAvailabilityResolver` under `app/Services/Availability` for policy validation and overlap-aware unit filtering.
+- Added unit tests for lead time, slot/duration validation, booking overlap blocking, and active session blocking.
+- Revalidated the expanded suite after the availability foundation slice without changing routes or UI.
+- Added the first booking create flow for both public guests and internal staff, backed by shared booking validation and `BookingCreator`.
+- Added public and internal booking pages, reusable `BookingForm`, booking FormRequests, and routes for `bookings.*` plus `management.bookings.*`.
+- Rebuilt frontend assets after the booking page additions; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Revalidated the expanded suite after the booking create flow slice, including public and internal booking feature tests.
+- Added internal booking lifecycle management with `management.bookings.index` plus a guarded status transition endpoint.
+- Added `BookingStatusManager`, transition request validation, and an internal booking listing page for staff with `manage-bookings`.
+- Added booking lifecycle feature coverage for index access, valid transitions, and invalid transition rejection.
+- Rebuilt frontend assets after adding the booking index page; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added POS service session start/stop foundation with cashier-only routes under `pos.sessions.*`.
+- Added `ServiceSessionService`, POS FormRequests, and a data-backed `Pos/Sessions/Index` page for walk-in or booking-linked session starts plus stop actions.
+- Added feature coverage for valid walk-in start, booking-linked check-in, overlap rejection, stop completion, and invalid stop rejection.
+- Rebuilt frontend assets after adding the POS session page; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added cafe ordering foundation with schema for `product_categories`, `products`, `orders`, and `order_items`.
+- Added `ProductCatalogSeeder`, POS order validation/service/controller/page, and customer/booking/session order relations.
+- Added feature coverage for cashier access, active-session-linked cafe orders, inactive product rejection, and snapshot-based order lines.
+- Rebuilt database and frontend assets after the cafe order slice; Node `20.10.0` warning remains non-blocking but should be upgraded.

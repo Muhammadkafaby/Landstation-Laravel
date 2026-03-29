@@ -1,24 +1,86 @@
 <?php
 
+use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\BookingManagementController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ManagementController;
+use App\Http\Controllers\Admin\ServiceBookingPolicyController;
+use App\Http\Controllers\Admin\ServiceCategoryController;
+use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
+use App\Http\Controllers\Admin\ServicePricingRuleController;
+use App\Http\Controllers\Admin\ServiceUnitController;
+use App\Http\Controllers\Pos\DashboardController as PosDashboardController;
+use App\Http\Controllers\Pos\OrderController as PosOrderController;
+use App\Http\Controllers\Pos\SessionController as PosSessionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\BookingController as PublicBookingController;
+use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\ServiceController;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
-});
+Route::get('/', HomeController::class)->name('home');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])->name('dashboard');
+Route::get('/services', ServiceController::class)->name('services.index');
 
-Route::get('/pos', function () {
-    return Inertia::render('Pos/Index');
-})->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_POS])->name('pos.index');
+Route::get('/booking', [PublicBookingController::class, 'create'])->name('bookings.create');
+Route::post('/bookings', [PublicBookingController::class, 'store'])->name('bookings.store');
+
+Route::get('/dashboard', AdminDashboardController::class)
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('dashboard');
+
+Route::get('/management', ManagementController::class)
+    ->middleware(['auth', 'staff', 'permission:'.Permission::MANAGE_MASTER_DATA])
+    ->name('management.index');
+
+Route::middleware(['auth', 'staff', 'permission:'.Permission::MANAGE_MASTER_DATA])
+    ->prefix('management')
+    ->name('management.')
+    ->group(function () {
+        Route::get('/services', [AdminServiceController::class, 'index'])->name('services.index');
+        Route::post('/service-categories', [ServiceCategoryController::class, 'store'])->name('service-categories.store');
+        Route::patch('/service-categories/{serviceCategory}', [ServiceCategoryController::class, 'update'])->name('service-categories.update');
+        Route::post('/services', [AdminServiceController::class, 'store'])->name('services.store');
+        Route::patch('/services/{service}', [AdminServiceController::class, 'update'])->name('services.update');
+        Route::post('/service-units', [ServiceUnitController::class, 'store'])->name('service-units.store');
+        Route::patch('/service-units/{serviceUnit}', [ServiceUnitController::class, 'update'])->name('service-units.update');
+        Route::post('/service-pricing-rules', [ServicePricingRuleController::class, 'store'])->name('service-pricing-rules.store');
+        Route::patch('/service-pricing-rules/{servicePricingRule}', [ServicePricingRuleController::class, 'update'])->name('service-pricing-rules.update');
+        Route::post('/service-booking-policies', [ServiceBookingPolicyController::class, 'store'])->name('service-booking-policies.store');
+        Route::patch('/service-booking-policies/{serviceBookingPolicy}', [ServiceBookingPolicyController::class, 'update'])->name('service-booking-policies.update');
+    });
+
+Route::middleware(['auth', 'staff', 'permission:'.Permission::MANAGE_BOOKINGS])
+    ->prefix('management/bookings')
+    ->name('management.bookings.')
+    ->group(function () {
+        Route::get('/', [BookingManagementController::class, 'index'])->name('index');
+        Route::get('/create', [AdminBookingController::class, 'create'])->name('create');
+        Route::post('/', [AdminBookingController::class, 'store'])->name('store');
+        Route::patch('/{booking}/transition', [BookingManagementController::class, 'transition'])->name('transition');
+    });
+
+Route::get('/pos', PosDashboardController::class)
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_POS])
+    ->name('pos.index');
+
+Route::middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_POS])
+    ->prefix('pos/sessions')
+    ->name('pos.sessions.')
+    ->group(function () {
+        Route::get('/', [PosSessionController::class, 'index'])->name('index');
+        Route::post('/', [PosSessionController::class, 'store'])->name('store');
+        Route::patch('/{serviceSession}/stop', [PosSessionController::class, 'stop'])->name('stop');
+    });
+
+Route::middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_POS])
+    ->prefix('pos/orders')
+    ->name('pos.orders.')
+    ->group(function () {
+        Route::get('/', [PosOrderController::class, 'index'])->name('index');
+        Route::post('/', [PosOrderController::class, 'store'])->name('store');
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

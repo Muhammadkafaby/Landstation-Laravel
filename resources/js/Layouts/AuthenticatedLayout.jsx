@@ -33,6 +33,22 @@ export default function AuthenticatedLayout({ header, children }) {
                                         Admin
                                     </NavLink>
                                 )}
+                                {capabilities.manageMasterData && (
+                                    <NavLink
+                                        href={route('management.index')}
+                                        active={route().current('management.index')}
+                                    >
+                                        Management
+                                    </NavLink>
+                                )}
+                                {capabilities.manageBookings && (
+                                    <NavLink
+                                        href={route('management.bookings.index')}
+                                        active={route().current('management.bookings.*')}
+                                    >
+                                        Bookings
+                                    </NavLink>
+                                )}
                                 {capabilities.accessPos && (
                                     <NavLink
                                         href={route('pos.index')}
@@ -143,6 +159,22 @@ export default function AuthenticatedLayout({ header, children }) {
                                 active={route().current('dashboard')}
                             >
                                 Admin
+                            </ResponsiveNavLink>
+                        )}
+                        {capabilities.manageMasterData && (
+                            <ResponsiveNavLink
+                                href={route('management.index')}
+                                active={route().current('management.index')}
+                            >
+                                Management
+                            </ResponsiveNavLink>
+                        )}
+                        {capabilities.manageBookings && (
+                            <ResponsiveNavLink
+                                href={route('management.bookings.index')}
+                                active={route().current('management.bookings.*')}
+                            >
+                                Bookings
                             </ResponsiveNavLink>
                         )}
                         {capabilities.accessPos && (

@@ -19,4 +19,35 @@ Build the Land Station v1 web system with customer website, admin dashboard, POS
 8. Hardening and audit
 
 ## Current Execution Slice
-- Component 2: Access control and staff auth refinement
+- Completed: Phase 1 Component 1 - module route foundation (`Public`, `Admin`, `Pos`, `Management` entrypoints)
+- Completed: Phase 1 Component 2 - flexible service catalog baseline
+- Delivered: schema + models + baseline seeder for `service_categories`, `services`, and `service_units`
+- Completed: Phase 1 Component 3 - service pricing and booking-policy baseline
+- Delivered: schema + models + seeded defaults for `service_pricing_rules` and `service_booking_policies`
+- Completed: Phase 1 Component 4 - data-backed admin management read surface for seeded master data
+- Delivered: `/management` summary cards and grouped category/service overview from seeded DB props
+- Completed: Phase 1 Component 5 - data-backed public service catalog read surface
+- Delivered: `/services` guest catalog summary with category/service/pricing readiness props
+- Completed: Phase 1 Component 6 - data-backed public homepage overview
+- Delivered: `/` guest overview with seeded summary counts and featured-service signals
+- Completed: Phase 2 Component 1 - admin dashboard metrics read surface
+- Delivered: `/dashboard` operational summary cards and category overview from seeded DB props
+- Completed: Phase 2 Component 2 - service master-data CRUD foundation
+- Delivered: management-protected CRUD create/update flows for service categories and services
+- Completed: Phase 2 Component 3 - service unit CRUD foundation
+- Delivered: management-protected CRUD create/update flows for `service_units`
+- Completed: Phase 2 Component 4 - pricing rule and booking policy CRUD foundation
+- Delivered: management-protected CRUD create/update flows for `service_pricing_rules` and `service_booking_policies`
+- Completed: Phase 3 Component 1 - booking schema and relation foundation
+- Delivered: schema + models for `customers`, `bookings`, and `service_sessions`
+- Completed: Phase 3 Component 2 - availability resolver and booking validation foundation
+- Delivered: reusable timed-service availability resolver with policy validation and overlap filtering
+- Completed: Phase 3 Component 3 - booking create flow and public/admin booking entry
+- Delivered: guest + internal booking create pages, shared validation, and booking creation service
+- Completed: Phase 3 Component 4 - booking listing/management flow and status transitions
+- Delivered: internal booking list plus minimal lifecycle transitions (`pending->confirmed/cancelled`, `confirmed->checked_in/cancelled/no_show`, `checked_in->completed`)
+- Completed: Phase 4 Component 1 - service session start/stop foundation for POS
+- Delivered: cashier-only session control with walk-in/booking-linked start and stop lifecycle
+- Completed: Phase 4 Component 2 - POS cafe order schema and order flow
+- Delivered: cafe product catalog foundation plus cashier order create flow linked to customer/booking/session
+- Next: Phase 5 Component 1 - invoice and payment schema foundation
