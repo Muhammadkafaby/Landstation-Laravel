@@ -78,6 +78,16 @@ class User extends Authenticatable
         return $this->hasMany(ServiceSession::class, 'closed_by_user_id');
     }
 
+    public function createdInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'created_by_user_id');
+    }
+
+    public function verifiedPayments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'verified_by_user_id');
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;

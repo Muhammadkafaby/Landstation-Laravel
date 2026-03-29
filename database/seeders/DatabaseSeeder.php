@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AccessControlSeeder::class,
             ServiceCatalogSeeder::class,
             ProductCatalogSeeder::class,
+            PaymentMethodSeeder::class,
             StaffUserSeeder::class,
         ]);
     }

@@ -50,4 +50,8 @@ Build the Land Station v1 web system with customer website, admin dashboard, POS
 - Delivered: cashier-only session control with walk-in/booking-linked start and stop lifecycle
 - Completed: Phase 4 Component 2 - POS cafe order schema and order flow
 - Delivered: cafe product catalog foundation plus cashier order create flow linked to customer/booking/session
-- Next: Phase 5 Component 1 - invoice and payment schema foundation
+- Completed: Phase 5 Component 1 - invoice and payment schema foundation
+- Delivered: schema + models + payment method seed data for invoices, lines, and payments
+- Completed: Phase 5 Component 2 - invoice builder and payment verification foundation
+- Delivered: backend invoice assembly and manual payment verification services with test coverage
+- Next: Phase 5 Component 3 - POS checkout page/controller flow

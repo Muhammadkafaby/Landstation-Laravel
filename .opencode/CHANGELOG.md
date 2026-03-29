@@ -69,3 +69,9 @@
 - Added `ProductCatalogSeeder`, POS order validation/service/controller/page, and customer/booking/session order relations.
 - Added feature coverage for cashier access, active-session-linked cafe orders, inactive product rejection, and snapshot-based order lines.
 - Rebuilt database and frontend assets after the cafe order slice; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added invoice/payment schema foundation with `payment_methods`, `invoices`, `invoice_lines`, and `payments`.
+- Added `PaymentMethodSeeder` plus `Invoice`, `InvoiceLine`, `Payment`, and `PaymentMethod` models with foundational relations from customer, booking, service session, and user.
+- Rebuilt database with `migrate:fresh --seed` and revalidated the expanded suite after the invoice/payment foundation slice.
+- Added `InvoiceBuilder` to assemble immutable invoice lines from completed service sessions and submitted cafe orders.
+- Added `ManualPaymentVerifier` to record verified cash/QRIS-manual payments, reject overpayment, and close invoices when fully paid.
+- Added billing tests covering invoice totals, paid-invoice immutability, verified payments, overpay rejection, and permission enforcement for payment verification.
