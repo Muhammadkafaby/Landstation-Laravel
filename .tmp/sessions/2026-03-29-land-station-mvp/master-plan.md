@@ -84,4 +84,6 @@ Build the Land Station v1 web system with customer website, admin dashboard, POS
 - Delivered: paginated booking management list with unchanged lifecycle transition behavior
 - Completed: Phase 8 Component 5 - admin audit log viewer
 - Delivered: admin-only audit log reporting with filters, pagination, and CSV export
-- Next: Phase 8 Component 6 - Node/tooling upgrade guidance and final hardening pass
+- Completed: Phase 8 Component 6 - Node/tooling hardening and production guidance
+- Delivered: Node engine pinning, local version file, repo-specific README, and CI frontend build verification
+- Next: Phase 9 - optional polish, per-page filters, and operational refinements

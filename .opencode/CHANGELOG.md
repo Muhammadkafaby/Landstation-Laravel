@@ -109,6 +109,9 @@
 - Reused the same pagination pattern as customer history/ledger and kept booking transition actions intact.
 - Added admin audit log viewer with filterable, paginated, and exportable audit entries.
 - Reused the reporting patterns for audit log search/filter/export while keeping the slice read-only and admin-only.
+- Added frontend runtime guidance by codifying Node engine requirements in `package.json` and `.nvmrc`.
+- Replaced the default Laravel README with repository-specific setup, verification, and production-readiness guidance.
+- Updated GitHub Actions to install the matching Node version, run `npm ci`, and verify `npm run build` alongside the PHP test job.
 - Added transaction ledger read surface with `TransactionLedgerController` and `Admin/Reports/Transactions/Index`.
 - Added invoice-centric drill-down reporting for line items, verified payments, and remaining balance calculations.
 - Added feature coverage for admin transaction ledger access and verified/remaining ledger props.
