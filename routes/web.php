@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\BookingManagementController;
+use App\Http\Controllers\Admin\CustomerHistoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ManagementController;
 use App\Http\Controllers\Admin\ReportController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\ServicePricingRuleController;
 use App\Http\Controllers\Admin\ServiceUnitController;
+use App\Http\Controllers\Admin\TransactionLedgerController;
 use App\Http\Controllers\Pos\CheckoutController as PosCheckoutController;
 use App\Http\Controllers\Pos\DashboardController as PosDashboardController;
 use App\Http\Controllers\Pos\OrderController as PosOrderController;
@@ -35,6 +37,18 @@ Route::get('/dashboard', AdminDashboardController::class)
 Route::get('/reports', ReportController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
     ->name('reports.index');
+
+Route::middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->prefix('reports/customers')
+    ->name('reports.customers.')
+    ->group(function () {
+        Route::get('/', [CustomerHistoryController::class, 'index'])->name('index');
+        Route::get('/{customer}', [CustomerHistoryController::class, 'show'])->name('show');
+    });
+
+Route::get('/reports/transactions', TransactionLedgerController::class)
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('reports.transactions.index');
 
 Route::get('/management', ManagementController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::MANAGE_MASTER_DATA])

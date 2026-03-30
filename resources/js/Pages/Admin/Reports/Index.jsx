@@ -32,6 +32,18 @@ export default function ReportsIndex({ summary, bookingSummary, paymentMethodSum
                     >
                         Kembali ke Dashboard
                     </Link>
+                    <Link
+                        href={route('reports.customers.index')}
+                        className="inline-flex w-fit rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
+                    >
+                        Buka Customer History
+                    </Link>
+                    <Link
+                        href={route('reports.transactions.index')}
+                        className="inline-flex w-fit rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+                    >
+                        Buka Transaction Ledger
+                    </Link>
                 </div>
             }
         >

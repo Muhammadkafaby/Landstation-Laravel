@@ -83,3 +83,11 @@
 - Added operational summary queries for bookings, sessions, orders, invoices, payments, and payment-method split.
 - Added admin reports access/summary test coverage and linked reports navigation from the dashboard/layout.
 - Rebuilt frontend assets after adding the reports page; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added customer history read surface with `CustomerHistoryController` plus admin-only list/detail pages under `reports.customers.*`.
+- Added customer-centric aggregates and timelines for bookings, sessions, orders, invoices, and verified payments.
+- Added feature coverage for admin access, cashier/non-staff rejection, customer summary counts, and detail timeline props.
+- Rebuilt frontend assets after adding customer history pages; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added transaction ledger read surface with `TransactionLedgerController` and `Admin/Reports/Transactions/Index`.
+- Added invoice-centric drill-down reporting for line items, verified payments, and remaining balance calculations.
+- Added feature coverage for admin transaction ledger access and verified/remaining ledger props.
+- Rebuilt frontend assets after adding the transaction ledger page; Node `20.10.0` warning remains non-blocking but should be upgraded.

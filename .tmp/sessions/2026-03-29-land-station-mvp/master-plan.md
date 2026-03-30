@@ -58,4 +58,8 @@ Build the Land Station v1 web system with customer website, admin dashboard, POS
 - Delivered: cashier-facing invoice preview and manual payment submission flow for completed sessions
 - Completed: Phase 6 Component 1 - reporting read surface and operational summaries
 - Delivered: admin-only reports page with booking/session/order/invoice/payment aggregates
-- Next: Phase 6 Component 2 - management/customer/transaction history refinements or reporting drill-downs
+- Completed: Phase 6 Component 2 - customer history and transaction history read surface
+- Delivered: admin-only customer list and detail pages with booking/session/order/invoice/payment history
+- Completed: Phase 6 Component 3 - transaction ledger and drill-down reporting
+- Delivered: admin-only invoice-centric ledger with line-item and payment drill-down
+- Next: Phase 7 - polish, exports, filters, and production hardening
