@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Booking;
 
+use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Availability\TimedServiceAvailabilityResolver;
 use Carbon\CarbonImmutable;
@@ -92,6 +93,25 @@ abstract class BaseStoreBookingRequest extends FormRequest
 
             if ($this->filled('service_unit_id') && ! $availableUnits->contains('id', $this->integer('service_unit_id'))) {
                 $validator->errors()->add('service_unit_id', 'The selected unit is not available for that booking window.');
+
+                return;
+            }
+
+            $activeHoldCount = Booking::query()
+                ->where('status', Booking::STATUS_HELD)
+                ->whereNotNull('hold_expires_at')
+                ->where('hold_expires_at', '>', now())
+                ->whereHas('customer', function ($query): void {
+                    $query->where('phone', $this->string('customer_phone')->toString());
+
+                    if ($this->filled('customer_email')) {
+                        $query->orWhere('email', $this->string('customer_email')->toString());
+                    }
+                })
+                ->count();
+
+            if ($activeHoldCount >= 2) {
+                $validator->errors()->add('customer_phone', 'The customer already has the maximum number of active booking holds.');
             }
         });
     }

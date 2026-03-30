@@ -159,11 +159,12 @@ test('valid booking lifecycle transitions succeed', function () {
         'customer_id' => $customer->id,
         'service_id' => $service->id,
         'service_unit_id' => $unit->id,
-        'status' => Booking::STATUS_PENDING,
+        'status' => Booking::STATUS_HELD,
         'booking_source' => Booking::SOURCE_PUBLIC,
         'start_at' => CarbonImmutable::parse('2026-04-03 18:00:00'),
         'end_at' => CarbonImmutable::parse('2026-04-03 19:00:00'),
         'duration_minutes' => 60,
+        'hold_expires_at' => CarbonImmutable::parse('2026-04-02 10:10:00'),
     ]);
 
     $this->actingAs($admin)
@@ -174,6 +175,7 @@ test('valid booking lifecycle transitions succeed', function () {
 
     $booking->refresh();
     expect($booking->status)->toBe(Booking::STATUS_CONFIRMED);
+    expect($booking->confirmed_at?->toDateTimeString())->toBe('2026-04-02 10:00:00');
 
     $this->actingAs($admin)
         ->patch(route('management.bookings.transition', $booking), [
@@ -210,21 +212,24 @@ test('invalid booking lifecycle transitions are rejected', function () {
         'customer_id' => $customer->id,
         'service_id' => $service->id,
         'service_unit_id' => $unit->id,
-        'status' => Booking::STATUS_PENDING,
+        'status' => Booking::STATUS_HELD,
         'booking_source' => Booking::SOURCE_PUBLIC,
         'start_at' => CarbonImmutable::parse('2026-04-03 20:00:00'),
         'end_at' => CarbonImmutable::parse('2026-04-03 21:00:00'),
         'duration_minutes' => 60,
+        'hold_expires_at' => CarbonImmutable::parse('2026-04-02 09:59:00'),
     ]);
 
     $this->actingAs($cashier)
         ->from(route('management.bookings.index'))
         ->patch(route('management.bookings.transition', $booking), [
-            'status' => Booking::STATUS_COMPLETED,
+            'status' => Booking::STATUS_CONFIRMED,
         ])
         ->assertRedirect(route('management.bookings.index'))
         ->assertSessionHasErrors('status');
 
     $booking->refresh();
-    expect($booking->status)->toBe(Booking::STATUS_PENDING);
+    expect($booking->status)->toBe(Booking::STATUS_EXPIRED);
+    expect($booking->confirmed_at)->toBeNull();
+    expect($booking->expired_at?->toDateTimeString())->toBe('2026-04-02 10:00:00');
 });

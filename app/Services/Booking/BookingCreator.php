@@ -6,11 +6,13 @@ use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\ServicePricingRule;
+use App\Models\ServiceSession;
 use App\Models\ServiceUnit;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BookingCreator
 {
@@ -19,12 +21,20 @@ class BookingCreator
         return DB::transaction(function () use ($data, $source, $status, $createdBy): Booking {
             $service = Service::query()->findOrFail($data['service_id']);
             $unit = isset($data['service_unit_id']) && $data['service_unit_id'] !== null
-                ? ServiceUnit::query()->findOrFail($data['service_unit_id'])
+                ? ServiceUnit::query()->lockForUpdate()->findOrFail($data['service_unit_id'])
                 : null;
             $startAt = CarbonImmutable::parse($data['start_at']);
             $endAt = CarbonImmutable::parse($data['end_at']);
 
+            $this->assertUnitStillAvailable($service, $unit, $startAt, $endAt);
+
             $customer = $this->resolveCustomer($data);
+            $holdExpiresAt = $status === Booking::STATUS_HELD
+                ? CarbonImmutable::now()->addMinutes(10)
+                : null;
+            $confirmedAt = $status === Booking::STATUS_CONFIRMED
+                ? CarbonImmutable::now()
+                : null;
 
             return Booking::query()->create([
                 'booking_code' => $this->generateBookingCode(),
@@ -32,6 +42,8 @@ class BookingCreator
                 'service_id' => $service->id,
                 'service_unit_id' => $unit?->id,
                 'status' => $status,
+                'hold_expires_at' => $holdExpiresAt,
+                'confirmed_at' => $confirmedAt,
                 'booking_source' => $source,
                 'start_at' => $startAt,
                 'end_at' => $endAt,
@@ -41,6 +53,55 @@ class BookingCreator
                 'created_by_user_id' => $createdBy?->id,
             ]);
         });
+    }
+
+    protected function assertUnitStillAvailable(
+        Service $service,
+        ?ServiceUnit $unit,
+        CarbonImmutable $startAt,
+        CarbonImmutable $endAt,
+    ): void {
+        if ($unit === null) {
+            return;
+        }
+
+        $hasBlockingBooking = Booking::query()
+            ->where('service_id', $service->id)
+            ->where('service_unit_id', $unit->id)
+            ->where(function ($query): void {
+                $query->where(function ($heldQuery): void {
+                    $heldQuery->where('status', Booking::STATUS_HELD)
+                        ->whereNotNull('hold_expires_at')
+                        ->where('hold_expires_at', '>', now());
+                })->orWhereIn('status', [
+                    Booking::STATUS_PENDING,
+                    Booking::STATUS_CONFIRMED,
+                    Booking::STATUS_CHECKED_IN,
+                ]);
+            })
+            ->where('start_at', '<', $endAt)
+            ->where('end_at', '>', $startAt)
+            ->exists();
+
+        $hasBlockingSession = ServiceSession::query()
+            ->where('service_id', $service->id)
+            ->where('service_unit_id', $unit->id)
+            ->whereIn('status', [
+                ServiceSession::STATUS_ACTIVE,
+                ServiceSession::STATUS_PAUSED,
+            ])
+            ->where('started_at', '<', $endAt)
+            ->where(function ($query) use ($startAt): void {
+                $query->whereNull('ended_at')
+                    ->orWhere('ended_at', '>', $startAt);
+            })
+            ->exists();
+
+        if ($hasBlockingBooking || $hasBlockingSession) {
+            throw ValidationException::withMessages([
+                'service_unit_id' => 'The selected unit is no longer available for that booking window.',
+            ]);
+        }
     }
 
     protected function resolveCustomer(array $data): Customer

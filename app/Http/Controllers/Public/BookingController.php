@@ -25,7 +25,7 @@ class BookingController extends Controller
         $bookingCreator->create(
             $request->validated(),
             Booking::SOURCE_PUBLIC,
-            Booking::STATUS_PENDING,
+            Booking::STATUS_HELD,
         );
 
         return redirect()->route('bookings.create');

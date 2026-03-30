@@ -127,6 +127,37 @@ test('resolver ignores terminal bookings and closed sessions when computing avai
     expect($availableUnits->pluck('code')->all())->toBe(['ps-01', 'ps-02']);
 });
 
+test('resolver ignores held bookings that are already expired', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+    $customer = Customer::query()->create([
+        'name' => 'Expired Holder',
+        'phone' => '081100000099',
+    ]);
+    $resolver = app(TimedServiceAvailabilityResolver::class);
+
+    Booking::query()->create([
+        'booking_code' => 'BK-AV-EXPIRED',
+        'customer_id' => $customer->id,
+        'service_id' => $service->id,
+        'service_unit_id' => $unit->id,
+        'status' => Booking::STATUS_HELD,
+        'booking_source' => Booking::SOURCE_PUBLIC,
+        'start_at' => CarbonImmutable::parse('2026-04-03 14:00:00'),
+        'end_at' => CarbonImmutable::parse('2026-04-03 15:00:00'),
+        'duration_minutes' => 60,
+        'hold_expires_at' => CarbonImmutable::parse('2026-04-02 09:59:00'),
+    ]);
+
+    $availableUnits = $resolver->availableUnits(
+        $service,
+        CarbonImmutable::parse('2026-04-03 14:00:00'),
+        CarbonImmutable::parse('2026-04-03 15:00:00'),
+    );
+
+    expect($availableUnits->pluck('code')->all())->toContain('ps-01');
+});
+
 test('resolver rejects booking windows that violate lead time', function () {
     $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
     $resolver = app(TimedServiceAvailabilityResolver::class);

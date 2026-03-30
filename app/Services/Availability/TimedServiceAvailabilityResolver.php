@@ -71,12 +71,6 @@ class TimedServiceAvailabilityResolver
     {
         $this->assertBookableWindow($service, $startAt, $endAt);
 
-        $blockingBookingStatuses = [
-            Booking::STATUS_PENDING,
-            Booking::STATUS_CONFIRMED,
-            Booking::STATUS_CHECKED_IN,
-        ];
-
         $blockingSessionStatuses = [
             ServiceSession::STATUS_ACTIVE,
             ServiceSession::STATUS_PAUSED,
@@ -85,7 +79,17 @@ class TimedServiceAvailabilityResolver
         $blockedByBookings = Booking::query()
             ->where('service_id', $service->id)
             ->whereNotNull('service_unit_id')
-            ->whereIn('status', $blockingBookingStatuses)
+            ->where(function ($query): void {
+                $query->where(function ($heldQuery): void {
+                    $heldQuery->where('status', Booking::STATUS_HELD)
+                        ->whereNotNull('hold_expires_at')
+                        ->where('hold_expires_at', '>', now());
+                })->orWhereIn('status', [
+                    Booking::STATUS_PENDING,
+                    Booking::STATUS_CONFIRMED,
+                    Booking::STATUS_CHECKED_IN,
+                ]);
+            })
             ->when($excludeBookingId !== null, fn ($query) => $query->whereKeyNot($excludeBookingId))
             ->where('start_at', '<', $endAt)
             ->where('end_at', '>', $startAt)

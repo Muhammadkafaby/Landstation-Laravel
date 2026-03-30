@@ -49,9 +49,16 @@ test('guests can create a valid timed-service booking', function () {
         'customer_id' => $customer->id,
         'service_id' => $service->id,
         'service_unit_id' => $unit->id,
-        'status' => Booking::STATUS_PENDING,
+        'status' => Booking::STATUS_HELD,
         'booking_source' => Booking::SOURCE_PUBLIC,
     ]);
+
+    $booking = Booking::query()
+        ->where('customer_id', $customer->id)
+        ->where('service_id', $service->id)
+        ->firstOrFail();
+
+    expect($booking->hold_expires_at?->toDateTimeString())->toBe('2026-04-02 10:10:00');
 });
 
 test('public booking create rejects windows that violate booking policy', function () {
@@ -108,4 +115,73 @@ test('public booking create rejects unavailable units', function () {
         ])
         ->assertRedirect(route('bookings.create'))
         ->assertSessionHasErrors('service_unit_id');
+});
+
+test('public booking create rejects units already held by another guest', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    $this->post(route('bookings.store'), [
+        'customer_name' => 'Hold Pertama',
+        'customer_phone' => '081234567890',
+        'customer_email' => 'hold1@example.com',
+        'service_id' => $service->id,
+        'service_unit_id' => $unit->id,
+        'start_at' => '2026-04-03 14:00:00',
+        'end_at' => '2026-04-03 15:00:00',
+        'notes' => 'Hold pertama',
+    ])->assertRedirect(route('bookings.create'));
+
+    $this->from(route('bookings.create'))
+        ->post(route('bookings.store'), [
+            'customer_name' => 'Hold Kedua',
+            'customer_phone' => '081234567891',
+            'customer_email' => 'hold2@example.com',
+            'service_id' => $service->id,
+            'service_unit_id' => $unit->id,
+            'start_at' => '2026-04-03 14:00:00',
+            'end_at' => '2026-04-03 15:00:00',
+            'notes' => 'Hold kedua',
+        ])
+        ->assertRedirect(route('bookings.create'))
+        ->assertSessionHasErrors('service_unit_id');
+});
+
+test('public booking create rejects customers with too many active holds', function () {
+    $playstation = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $billiard = Service::query()->where('code', 'billiard-regular')->firstOrFail();
+    $firstPsUnit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+    $secondPsUnit = ServiceUnit::query()->where('code', 'ps-02')->firstOrFail();
+    $billiardUnit = ServiceUnit::query()->where('code', 'bill-01')->firstOrFail();
+
+    $payload = [
+        'customer_name' => 'Limiter Guest',
+        'customer_phone' => '081234567892',
+        'customer_email' => 'limit@example.com',
+        'notes' => 'Limit test',
+    ];
+
+    $this->post(route('bookings.store'), array_merge($payload, [
+        'service_id' => $playstation->id,
+        'service_unit_id' => $firstPsUnit->id,
+        'start_at' => '2026-04-03 14:00:00',
+        'end_at' => '2026-04-03 15:00:00',
+    ]))->assertRedirect(route('bookings.create'));
+
+    $this->post(route('bookings.store'), array_merge($payload, [
+        'service_id' => $playstation->id,
+        'service_unit_id' => $secondPsUnit->id,
+        'start_at' => '2026-04-03 16:00:00',
+        'end_at' => '2026-04-03 17:00:00',
+    ]))->assertRedirect(route('bookings.create'));
+
+    $this->from(route('bookings.create'))
+        ->post(route('bookings.store'), array_merge($payload, [
+            'service_id' => $billiard->id,
+            'service_unit_id' => $billiardUnit->id,
+            'start_at' => '2026-04-03 18:00:00',
+            'end_at' => '2026-04-03 19:00:00',
+        ]))
+        ->assertRedirect(route('bookings.create'))
+        ->assertSessionHasErrors('customer_phone');
 });

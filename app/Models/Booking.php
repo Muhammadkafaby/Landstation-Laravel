@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Booking extends Model
 {
     use HasFactory;
+
+    public const STATUS_HELD = 'held';
 
     public const STATUS_PENDING = 'pending';
 
@@ -23,6 +26,8 @@ class Booking extends Model
 
     public const STATUS_NO_SHOW = 'no_show';
 
+    public const STATUS_EXPIRED = 'expired';
+
     public const SOURCE_PUBLIC = 'public';
 
     public const SOURCE_ADMIN = 'admin';
@@ -35,6 +40,10 @@ class Booking extends Model
         'service_id',
         'service_unit_id',
         'status',
+        'hold_expires_at',
+        'confirmed_at',
+        'expired_at',
+        'status_reason',
         'booking_source',
         'start_at',
         'end_at',
@@ -49,6 +58,9 @@ class Booking extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'hold_expires_at' => 'datetime',
+            'confirmed_at' => 'datetime',
+            'expired_at' => 'datetime',
             'pricing_snapshot_json' => 'array',
         ];
     }
@@ -86,5 +98,26 @@ class Booking extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function holdHasExpired(): bool
+    {
+        return $this->status === self::STATUS_HELD
+            && $this->hold_expires_at !== null
+            && $this->hold_expires_at->lessThanOrEqualTo(Carbon::now());
+    }
+
+    public function holdIsActive(): bool
+    {
+        return $this->status === self::STATUS_HELD
+            && $this->hold_expires_at !== null
+            && $this->hold_expires_at->isFuture();
+    }
+
+    public function runtimeStatus(): string
+    {
+        return $this->holdHasExpired()
+            ? self::STATUS_EXPIRED
+            : $this->status;
     }
 }

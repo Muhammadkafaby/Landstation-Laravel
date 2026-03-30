@@ -28,8 +28,12 @@ Route::get('/', HomeController::class)->name('home');
 
 Route::get('/services', ServiceController::class)->name('services.index');
 
-Route::get('/booking', [PublicBookingController::class, 'create'])->name('bookings.create');
-Route::post('/bookings', [PublicBookingController::class, 'store'])->name('bookings.store');
+Route::get('/booking', [PublicBookingController::class, 'create'])
+    ->middleware('throttle:public-bookings')
+    ->name('bookings.create');
+Route::post('/bookings', [PublicBookingController::class, 'store'])
+    ->middleware('throttle:public-bookings')
+    ->name('bookings.store');
 
 Route::get('/dashboard', AdminDashboardController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
