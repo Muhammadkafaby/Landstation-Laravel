@@ -75,3 +75,11 @@
 - Added `InvoiceBuilder` to assemble immutable invoice lines from completed service sessions and submitted cafe orders.
 - Added `ManualPaymentVerifier` to record verified cash/QRIS-manual payments, reject overpayment, and close invoices when fully paid.
 - Added billing tests covering invoice totals, paid-invoice immutability, verified payments, overpay rejection, and permission enforcement for payment verification.
+- Added POS checkout flow with `CheckoutController`, `StoreCheckoutPaymentRequest`, and `Pos/Checkout/Show` for invoice preview plus payment submission.
+- Reused `InvoiceBuilder` and `ManualPaymentVerifier` to power cashier checkout without introducing a separate checkout state model.
+- Added feature coverage for checkout preview, cash payment, QRIS-manual paid state, and overpayment rejection.
+- Rebuilt frontend assets after adding the checkout page; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added admin reporting read surface with `ReportController` and `Admin/Reports/Index`.
+- Added operational summary queries for bookings, sessions, orders, invoices, payments, and payment-method split.
+- Added admin reports access/summary test coverage and linked reports navigation from the dashboard/layout.
+- Rebuilt frontend assets after adding the reports page; Node `20.10.0` warning remains non-blocking but should be upgraded.

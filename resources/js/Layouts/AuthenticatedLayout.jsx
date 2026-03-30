@@ -33,6 +33,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                         Admin
                                     </NavLink>
                                 )}
+                                {capabilities.accessAdmin && (
+                                    <NavLink
+                                        href={route('reports.index')}
+                                        active={route().current('reports.index')}
+                                    >
+                                        Reports
+                                    </NavLink>
+                                )}
                                 {capabilities.manageMasterData && (
                                     <NavLink
                                         href={route('management.index')}
@@ -159,6 +167,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                 active={route().current('dashboard')}
                             >
                                 Admin
+                            </ResponsiveNavLink>
+                        )}
+                        {capabilities.accessAdmin && (
+                            <ResponsiveNavLink
+                                href={route('reports.index')}
+                                active={route().current('reports.index')}
+                            >
+                                Reports
                             </ResponsiveNavLink>
                         )}
                         {capabilities.manageMasterData && (

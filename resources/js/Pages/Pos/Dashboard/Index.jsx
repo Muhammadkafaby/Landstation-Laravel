@@ -84,6 +84,23 @@ export default function PosDashboardIndex() {
                             </Link>
                         </div>
                     </div>
+
+                    <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 lg:p-8">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold text-white">Checkout backend siap dipakai</h2>
+                                <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
+                                    Setelah session selesai dan cafe order tercatat, invoice bisa dipreview serta dibayar manual lewat flow checkout POS.
+                                </p>
+                            </div>
+                            <Link
+                                href={route('pos.sessions.index')}
+                                className="inline-flex w-fit rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+                            >
+                                Pilih session selesai
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AuthenticatedLayout>

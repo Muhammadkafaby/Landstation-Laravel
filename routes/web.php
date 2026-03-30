@@ -4,11 +4,13 @@ use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ManagementController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ServiceBookingPolicyController;
 use App\Http\Controllers\Admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\ServicePricingRuleController;
 use App\Http\Controllers\Admin\ServiceUnitController;
+use App\Http\Controllers\Pos\CheckoutController as PosCheckoutController;
 use App\Http\Controllers\Pos\DashboardController as PosDashboardController;
 use App\Http\Controllers\Pos\OrderController as PosOrderController;
 use App\Http\Controllers\Pos\SessionController as PosSessionController;
@@ -29,6 +31,10 @@ Route::post('/bookings', [PublicBookingController::class, 'store'])->name('booki
 Route::get('/dashboard', AdminDashboardController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
     ->name('dashboard');
+
+Route::get('/reports', ReportController::class)
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('reports.index');
 
 Route::get('/management', ManagementController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::MANAGE_MASTER_DATA])
@@ -80,6 +86,14 @@ Route::middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_POS])
     ->group(function () {
         Route::get('/', [PosOrderController::class, 'index'])->name('index');
         Route::post('/', [PosOrderController::class, 'store'])->name('store');
+    });
+
+Route::middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_POS])
+    ->prefix('pos/checkout')
+    ->name('pos.checkout.')
+    ->group(function () {
+        Route::get('/{serviceSession}', [PosCheckoutController::class, 'show'])->name('show');
+        Route::post('/{serviceSession}/payments', [PosCheckoutController::class, 'storePayment'])->name('payments.store');
     });
 
 Route::middleware('auth')->group(function () {

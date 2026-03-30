@@ -54,4 +54,8 @@ Build the Land Station v1 web system with customer website, admin dashboard, POS
 - Delivered: schema + models + payment method seed data for invoices, lines, and payments
 - Completed: Phase 5 Component 2 - invoice builder and payment verification foundation
 - Delivered: backend invoice assembly and manual payment verification services with test coverage
-- Next: Phase 5 Component 3 - POS checkout page/controller flow
+- Completed: Phase 5 Component 3 - POS checkout page/controller flow
+- Delivered: cashier-facing invoice preview and manual payment submission flow for completed sessions
+- Completed: Phase 6 Component 1 - reporting read surface and operational summaries
+- Delivered: admin-only reports page with booking/session/order/invoice/payment aggregates
+- Next: Phase 6 Component 2 - management/customer/transaction history refinements or reporting drill-downs
