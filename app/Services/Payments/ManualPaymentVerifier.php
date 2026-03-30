@@ -7,12 +7,17 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Permission;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ManualPaymentVerifier
 {
+    public function __construct(
+        protected AuditLogger $auditLogger,
+    ) {}
+
     public function verify(
         Invoice $invoice,
         string $paymentMethodCode,
@@ -83,6 +88,13 @@ class ManualPaymentVerifier
                     'closed_at' => CarbonImmutable::now(),
                 ]);
             }
+
+            $this->auditLogger->log($verifiedBy, 'payment.verified', $invoice, [
+                'payment_id' => $payment->id,
+                'payment_method_code' => $payment->payment_method_code,
+                'amount_rupiah' => $payment->amount_rupiah,
+                'invoice_status' => $invoice->fresh()->status,
+            ]);
 
             return $payment;
         });

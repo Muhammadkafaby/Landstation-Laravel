@@ -19,8 +19,9 @@ class BookingManagementController extends Controller
                 ->with(['customer:id,name,phone', 'service:id,name,code', 'unit:id,name,code'])
                 ->withCount('serviceSessions')
                 ->orderByDesc('start_at')
-                ->get()
-                ->map(fn (Booking $booking) => [
+                ->paginate(15)
+                ->withQueryString()
+                ->through(fn (Booking $booking) => [
                     'id' => $booking->id,
                     'bookingCode' => $booking->booking_code,
                     'customerName' => $booking->customer?->name,
@@ -34,8 +35,7 @@ class BookingManagementController extends Controller
                     'startAt' => optional($booking->start_at)->toIso8601String(),
                     'endAt' => optional($booking->end_at)->toIso8601String(),
                     'serviceSessionsCount' => $booking->service_sessions_count,
-                ])
-                ->values(),
+                ]),
             'transitionOptions' => [
                 Booking::STATUS_PENDING,
                 Booking::STATUS_CONFIRMED,

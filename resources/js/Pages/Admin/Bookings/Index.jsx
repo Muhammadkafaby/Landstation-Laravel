@@ -71,7 +71,7 @@ export default function AdminBookingsIndex({ bookings, transitionOptions }) {
                     </div>
 
                     <div className="grid gap-6">
-                        {bookings.map((booking) => (
+                        {bookings.data.map((booking) => (
                             <section key={booking.id} className="rounded-3xl border border-white/10 bg-white/5 p-6">
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
@@ -104,6 +104,25 @@ export default function AdminBookingsIndex({ bookings, transitionOptions }) {
 
                                 <BookingTransitionForm booking={booking} transitionOptions={transitionOptions} />
                             </section>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        {bookings.links.map((link, index) => (
+                            link.url ? (
+                                <Link
+                                    key={`${link.label}-${index}`}
+                                    href={link.url}
+                                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${link.active ? 'bg-emerald-400 text-zinc-950' : 'border border-white/15 text-white hover:bg-white/10'}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ) : (
+                                <span
+                                    key={`${link.label}-${index}`}
+                                    className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-500"
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            )
                         ))}
                     </div>
                 </div>

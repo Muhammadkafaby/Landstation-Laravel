@@ -62,4 +62,26 @@ Build the Land Station v1 web system with customer website, admin dashboard, POS
 - Delivered: admin-only customer list and detail pages with booking/session/order/invoice/payment history
 - Completed: Phase 6 Component 3 - transaction ledger and drill-down reporting
 - Delivered: admin-only invoice-centric ledger with line-item and payment drill-down
-- Next: Phase 7 - polish, exports, filters, and production hardening
+- Completed: Phase 7 Component 1A - customer history search filter
+- Delivered: GET-based search on `reports.customers.index` for name, phone, and email
+- Completed: Phase 7 Component 1B - transaction ledger filters and search
+- Delivered: GET-based search/filter on `reports.transactions.index` for invoice code, customer, status, and payment method
+- Completed: Phase 7 Component 1C - reports summary date scope filter
+- Delivered: GET-based `date_scope` filtering on `reports.index` for all/today/last_7_days windows
+- Completed: Phase 7 Component 2 - transaction ledger CSV export
+- Delivered: admin-only CSV export for filtered transaction ledger data
+- Completed: Phase 7 Component 3 - customer history CSV export
+- Delivered: admin-only CSV export for filtered customer history summaries
+- Completed: Phase 7 Component 4 - reports summary CSV export
+- Delivered: admin-only CSV export for summary/report aggregate metrics
+- Completed: Phase 8 Component 1 - audit trail for critical operator actions
+- Delivered: persistent audit logging for payment verification, booking transitions, and service session start/stop
+- Completed: Phase 8 Component 2 - customer history pagination foundation
+- Delivered: paginated customer history list with query preservation and unchanged export behavior
+- Completed: Phase 8 Component 3 - transaction ledger pagination foundation
+- Delivered: paginated transaction ledger with query preservation and unchanged export behavior
+- Completed: Phase 8 Component 4 - booking management pagination foundation
+- Delivered: paginated booking management list with unchanged lifecycle transition behavior
+- Completed: Phase 8 Component 5 - admin audit log viewer
+- Delivered: admin-only audit log reporting with filters, pagination, and CSV export
+- Next: Phase 8 Component 6 - Node/tooling upgrade guidance and final hardening pass

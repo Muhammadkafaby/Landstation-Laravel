@@ -6,43 +6,69 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Payment;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class CustomerHistoryController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $customers = Customer::query()
-            ->withCount(['bookings', 'serviceSessions', 'orders', 'invoices'])
-            ->with([
-                'bookings:id,customer_id,start_at,end_at,created_at,updated_at',
-                'serviceSessions:id,customer_id,started_at,ended_at,created_at,updated_at',
-                'orders:id,customer_id,ordered_at,created_at,updated_at',
-                'invoices:id,customer_id,issued_at,closed_at,created_at,updated_at',
-                'invoices.payments:id,invoice_id,status,amount_rupiah,paid_at,created_at,updated_at',
-            ])
-            ->orderBy('name')
-            ->get()
-            ->map(function (Customer $customer): array {
-                return [
-                    'id' => $customer->id,
-                    'name' => $customer->name,
-                    'phone' => $customer->phone,
-                    'email' => $customer->email,
-                    'bookingsCount' => $customer->bookings_count,
-                    'sessionsCount' => $customer->service_sessions_count,
-                    'ordersCount' => $customer->orders_count,
-                    'invoicesCount' => $customer->invoices_count,
-                    'verifiedPaymentsRupiah' => $this->verifiedPaymentsRupiah($customer),
-                    'lastActivityAt' => $this->lastActivityAt($customer)?->toIso8601String(),
-                ];
-            })
-            ->values();
+        $customers = $this->customerQuery($this->search($request))
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn (Customer $customer) => $this->mapCustomer($customer));
 
         return Inertia::render('Admin/Customers/Index', [
             'customers' => $customers,
+            'filters' => [
+                'q' => $this->search($request),
+            ],
+        ]);
+    }
+
+    public function export(Request $request): HttpResponse
+    {
+        $customers = $this->mapCustomers($this->customerQuery($this->search($request))->get());
+
+        $stream = fopen('php://temp', 'r+');
+
+        fputcsv($stream, [
+            'name',
+            'phone',
+            'email',
+            'bookings_count',
+            'sessions_count',
+            'orders_count',
+            'invoices_count',
+            'verified_payments_rupiah',
+            'last_activity_at',
+        ]);
+
+        foreach ($customers as $customer) {
+            fputcsv($stream, [
+                $customer['name'],
+                $customer['phone'],
+                $customer['email'],
+                $customer['bookingsCount'],
+                $customer['sessionsCount'],
+                $customer['ordersCount'],
+                $customer['invoicesCount'],
+                $customer['verifiedPaymentsRupiah'],
+                $customer['lastActivityAt'],
+            ]);
+        }
+
+        rewind($stream);
+        $csv = stream_get_contents($stream);
+        fclose($stream);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename=customer-history.csv',
         ]);
     }
 
@@ -136,6 +162,56 @@ class CustomerHistoryController extends Controller
             ->flatMap->payments
             ->where('status', Payment::STATUS_VERIFIED)
             ->sum('amount_rupiah');
+    }
+
+    protected function customerQuery(string $search): Builder
+    {
+        return Customer::query()
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($customerQuery) use ($search): void {
+                    $customerQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->withCount(['bookings', 'serviceSessions', 'orders', 'invoices'])
+            ->with([
+                'bookings:id,customer_id,start_at,end_at,created_at,updated_at',
+                'serviceSessions:id,customer_id,started_at,ended_at,created_at,updated_at',
+                'orders:id,customer_id,ordered_at,created_at,updated_at',
+                'invoices:id,customer_id,issued_at,closed_at,created_at,updated_at',
+                'invoices.payments:id,invoice_id,status,amount_rupiah,paid_at,created_at,updated_at',
+            ])
+            ->orderBy('name');
+    }
+
+    protected function mapCustomers($customers)
+    {
+        return $customers
+            ->map(fn (Customer $customer): array => $this->mapCustomer($customer))
+            ->values();
+    }
+
+    protected function mapCustomer(Customer $customer): array
+    {
+        return [
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'phone' => $customer->phone,
+            'email' => $customer->email,
+            'bookingsCount' => $customer->bookings_count,
+            'sessionsCount' => $customer->service_sessions_count,
+            'ordersCount' => $customer->orders_count,
+            'invoicesCount' => $customer->invoices_count,
+            'verifiedPaymentsRupiah' => $this->verifiedPaymentsRupiah($customer),
+            'lastActivityAt' => $this->lastActivityAt($customer)?->toIso8601String(),
+        ];
+    }
+
+    protected function search(Request $request): string
+    {
+        return trim((string) $request->string('q')->toString());
     }
 
     protected function lastActivityAt(Customer $customer): ?CarbonInterface

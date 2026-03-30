@@ -87,6 +87,28 @@
 - Added customer-centric aggregates and timelines for bookings, sessions, orders, invoices, and verified payments.
 - Added feature coverage for admin access, cashier/non-staff rejection, customer summary counts, and detail timeline props.
 - Rebuilt frontend assets after adding customer history pages; Node `20.10.0` warning remains non-blocking but should be upgraded.
+- Added GET-based search to the customer history index using the `q` query parameter over customer name, phone, and email.
+- Added customer-history filter prop coverage and UI controls for search/clear without changing route protection or schema.
+- Added GET-based filter/search to the transaction ledger using `q`, `status`, and `payment_method` query parameters.
+- Added transaction-ledger filter prop coverage and UI controls for search/clear while preserving the existing ledger item shape and admin-only access.
+- Added GET-based `date_scope` filtering to the reports summary page with `all`, `today`, and `last_7_days` options.
+- Scoped booking, session, order, invoice, and verified-payment aggregates by their operational timestamps without changing the existing report prop structure.
+- Added CSV export for the filtered transaction ledger via `reports.transactions.export`.
+- Reused existing transaction-ledger filters (`q`, `status`, `payment_method`) for export output and kept the CSV invoice-summary level only.
+- Added CSV export for the filtered customer history list via `reports.customers.export`.
+- Reused the existing customer-history `q` filter for export output and kept the CSV at customer-summary level.
+- Added CSV export for the reports summary page via `reports.export`.
+- Reused the existing `date_scope` filter for export output and kept the CSV flat with `section,metric,value,date_scope` rows.
+- Added audit trail foundation with `audit_logs`, `AuditLog`, and `AuditLogger`.
+- Instrumented manual payment verification, booking status transitions, and service session start/stop with persistent audit entries.
+- Added pagination to the customer history index while preserving search query state and keeping CSV export full-result.
+- Reused existing customer summary semantics and added pagination coverage for page shape plus search preservation.
+- Added pagination to the transaction ledger while preserving `q`, `status`, and `payment_method` filters.
+- Kept transaction-ledger CSV export full-result and unchanged while paginating only the on-screen ledger list.
+- Added pagination to the booking management index while keeping lifecycle transitions unchanged.
+- Reused the same pagination pattern as customer history/ledger and kept booking transition actions intact.
+- Added admin audit log viewer with filterable, paginated, and exportable audit entries.
+- Reused the reporting patterns for audit log search/filter/export while keeping the slice read-only and admin-only.
 - Added transaction ledger read surface with `TransactionLedgerController` and `Admin/Reports/Transactions/Index`.
 - Added invoice-centric drill-down reporting for line items, verified payments, and remaining balance calculations.
 - Added feature coverage for admin transaction ledger access and verified/remaining ledger props.

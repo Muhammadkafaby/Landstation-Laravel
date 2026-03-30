@@ -63,8 +63,46 @@ test('staff with manage bookings can access the internal booking index page', fu
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Bookings/Index')
-            ->has('bookings', 1)
-            ->where('bookings.0.status', Booking::STATUS_PENDING)
+            ->has('bookings.data', 1)
+            ->where('bookings.total', 1)
+            ->where('bookings.data.0.status', Booking::STATUS_PENDING)
+        );
+});
+
+test('booking management index paginates booking summaries', function () {
+    $cashier = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::CASHIER)->value('id'),
+    ]);
+    $customer = Customer::query()->create([
+        'name' => 'Paged Booking Customer',
+        'phone' => '081200000030',
+    ]);
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    foreach (range(1, 16) as $index) {
+        Booking::query()->create([
+            'booking_code' => sprintf('BK-PAGED-%03d', $index),
+            'customer_id' => $customer->id,
+            'service_id' => $service->id,
+            'service_unit_id' => $unit->id,
+            'status' => Booking::STATUS_PENDING,
+            'booking_source' => Booking::SOURCE_PUBLIC,
+            'start_at' => CarbonImmutable::parse('2026-04-03 14:00:00')->addHours($index),
+            'end_at' => CarbonImmutable::parse('2026-04-03 15:00:00')->addHours($index),
+            'duration_minutes' => 60,
+        ]);
+    }
+
+    $this->actingAs($cashier)
+        ->get(route('management.bookings.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Bookings/Index')
+            ->has('bookings.data', 15)
+            ->where('bookings.current_page', 1)
+            ->where('bookings.per_page', 15)
+            ->where('bookings.total', 16)
         );
 });
 

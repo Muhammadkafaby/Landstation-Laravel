@@ -129,14 +129,162 @@ test('admins can access customer history list with aggregated activity summaries
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Customers/Index')
-            ->has('customers', 1)
-            ->where('customers.0.name', 'History Customer')
-            ->where('customers.0.bookingsCount', 2)
-            ->where('customers.0.sessionsCount', 1)
-            ->where('customers.0.ordersCount', 1)
-            ->where('customers.0.invoicesCount', 1)
-            ->where('customers.0.verifiedPaymentsRupiah', 66000)
+            ->has('customers.data', 1)
+            ->where('customers.total', 1)
+            ->where('customers.data.0.name', 'History Customer')
+            ->where('customers.data.0.bookingsCount', 2)
+            ->where('customers.data.0.sessionsCount', 1)
+            ->where('customers.data.0.ordersCount', 1)
+            ->where('customers.data.0.invoicesCount', 1)
+            ->where('customers.data.0.verifiedPaymentsRupiah', 66000)
         );
+});
+
+test('customer history index paginates customer summaries', function () {
+    $admin = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::ADMIN)->value('id'),
+    ]);
+
+    createCustomerHistoryFixture($admin);
+
+    foreach (range(1, 16) as $index) {
+        Customer::query()->create([
+            'name' => sprintf('Paged Customer %02d', $index),
+            'phone' => sprintf('081911100%03d', $index),
+            'email' => sprintf('paged%02d@example.com', $index),
+        ]);
+    }
+
+    $this->actingAs($admin)
+        ->get(route('reports.customers.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Customers/Index')
+            ->has('customers.data', 15)
+            ->where('customers.current_page', 1)
+            ->where('customers.per_page', 15)
+            ->where('customers.total', 17)
+        );
+});
+
+test('admins can search customer history by customer name', function () {
+    $admin = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::ADMIN)->value('id'),
+    ]);
+
+    createCustomerHistoryFixture($admin);
+    Customer::query()->create([
+        'name' => 'Another Member',
+        'phone' => '081900000999',
+        'email' => 'other@example.com',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('reports.customers.index', ['q' => 'History']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Customers/Index')
+            ->where('filters.q', 'History')
+            ->has('customers.data', 1)
+            ->where('customers.data.0.name', 'History Customer')
+        );
+});
+
+test('customer history pagination preserves search query', function () {
+    $admin = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::ADMIN)->value('id'),
+    ]);
+
+    createCustomerHistoryFixture($admin);
+
+    foreach (range(1, 16) as $index) {
+        Customer::query()->create([
+            'name' => sprintf('History Extra %02d', $index),
+            'phone' => sprintf('081922200%03d', $index),
+            'email' => sprintf('history-extra%02d@example.com', $index),
+        ]);
+    }
+
+    $this->actingAs($admin)
+        ->get(route('reports.customers.index', ['q' => 'History', 'page' => 2]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Customers/Index')
+            ->where('filters.q', 'History')
+            ->where('customers.current_page', 2)
+            ->where('customers.total', 17)
+            ->has('customers.data', 2)
+        );
+});
+
+test('admins can search customer history by phone or email', function () {
+    $admin = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::ADMIN)->value('id'),
+    ]);
+
+    createCustomerHistoryFixture($admin);
+    Customer::query()->create([
+        'name' => 'Different Member',
+        'phone' => '081900000555',
+        'email' => 'different@example.com',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('reports.customers.index', ['q' => 'different@example.com']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Customers/Index')
+            ->where('filters.q', 'different@example.com')
+            ->has('customers.data', 1)
+            ->where('customers.data.0.name', 'Different Member')
+        );
+});
+
+test('admins can export filtered customer history as csv', function () {
+    $admin = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::ADMIN)->value('id'),
+    ]);
+
+    createCustomerHistoryFixture($admin);
+    Customer::query()->create([
+        'name' => 'Different Member',
+        'phone' => '081900000555',
+        'email' => 'different@example.com',
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('reports.customers.export', ['q' => 'History']));
+
+    $response
+        ->assertOk()
+        ->assertHeader('content-disposition', 'attachment; filename=customer-history.csv');
+
+    $lines = preg_split("/\r\n|\n|\r/", trim($response->getContent()));
+
+    expect(str_getcsv($lines[0]))->toBe([
+        'name',
+        'phone',
+        'email',
+        'bookings_count',
+        'sessions_count',
+        'orders_count',
+        'invoices_count',
+        'verified_payments_rupiah',
+        'last_activity_at',
+    ]);
+
+    expect(str_getcsv($lines[1]))->toBe([
+        'History Customer',
+        '081900000001',
+        'history@example.com',
+        '2',
+        '1',
+        '1',
+        '1',
+        '66000',
+        '2026-04-08T10:00:00+00:00',
+    ])
+        ->and(implode("\n", $lines))->not->toContain('Different Member');
 });
 
 test('admins can access customer history detail with booking session order and invoice timelines', function () {
@@ -180,6 +328,10 @@ test('cashiers can not access customer history pages', function () {
     $this->actingAs($cashier)
         ->get(route('reports.customers.show', $customer))
         ->assertForbidden();
+
+    $this->actingAs($cashier)
+        ->get(route('reports.customers.export'))
+        ->assertForbidden();
 });
 
 test('non staff users can not access customer history pages', function () {
@@ -195,5 +347,9 @@ test('non staff users can not access customer history pages', function () {
 
     $this->actingAs($user)
         ->get(route('reports.customers.show', $customer))
+        ->assertForbidden();
+
+    $this->actingAs($user)
+        ->get(route('reports.customers.export'))
         ->assertForbidden();
 });

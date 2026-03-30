@@ -9,6 +9,7 @@ use App\Models\ServicePricingRule;
 use App\Models\ServiceSession;
 use App\Models\ServiceUnit;
 use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -16,6 +17,10 @@ use Illuminate\Validation\ValidationException;
 
 class ServiceSessionService
 {
+    public function __construct(
+        protected AuditLogger $auditLogger,
+    ) {}
+
     public function start(array $data, User $startedBy): ServiceSession
     {
         return DB::transaction(function () use ($data, $startedBy): ServiceSession {
@@ -59,6 +64,13 @@ class ServiceSessionService
                 ]);
             }
 
+            $this->auditLogger->log($startedBy, 'service_session.started', $session, [
+                'booking_id' => $booking?->id,
+                'customer_id' => $customer?->id,
+                'service_id' => $service->id,
+                'service_unit_id' => $unit->id,
+            ]);
+
             return $session;
         });
     }
@@ -91,6 +103,13 @@ class ServiceSessionService
                     'status' => Booking::STATUS_COMPLETED,
                 ]);
             }
+
+            $this->auditLogger->log($closedBy, 'service_session.stopped', $serviceSession, [
+                'booking_id' => $serviceSession->booking_id,
+                'service_id' => $serviceSession->service_id,
+                'service_unit_id' => $serviceSession->service_unit_id,
+                'billed_minutes' => $serviceSession->billed_minutes,
+            ]);
 
             return $serviceSession->refresh();
         });

@@ -3,11 +3,17 @@
 namespace App\Services\Booking;
 
 use App\Models\Booking;
+use App\Models\User;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Validation\ValidationException;
 
 class BookingStatusManager
 {
-    public function transition(Booking $booking, string $targetStatus): Booking
+    public function __construct(
+        protected AuditLogger $auditLogger,
+    ) {}
+
+    public function transition(Booking $booking, string $targetStatus, ?User $actor = null): Booking
     {
         $allowedTransitions = [
             Booking::STATUS_PENDING => [
@@ -33,8 +39,15 @@ class BookingStatusManager
             ]);
         }
 
+        $fromStatus = $booking->status;
+
         $booking->update([
             'status' => $targetStatus,
+        ]);
+
+        $this->auditLogger->log($actor, 'booking.status_transitioned', $booking, [
+            'from_status' => $fromStatus,
+            'to_status' => $targetStatus,
         ]);
 
         return $booking->refresh();

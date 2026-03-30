@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 
 const formatRupiah = (amount) => new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -7,7 +7,45 @@ const formatRupiah = (amount) => new Intl.NumberFormat('id-ID', {
     maximumFractionDigits: 0,
 }).format(amount);
 
-export default function TransactionLedgerIndex({ ledger }) {
+const statusOptions = ['draft', 'open', 'paid', 'void'];
+
+const paymentMethodOptions = ['', 'cash', 'qris_manual'];
+
+export default function TransactionLedgerIndex({ ledger, filters }) {
+    const { data, setData, processing } = useForm({
+        q: filters.q ?? '',
+        status: filters.status ?? '',
+        payment_method: filters.payment_method ?? '',
+    });
+
+    const submit = (event) => {
+        event.preventDefault();
+
+        router.get(route('reports.transactions.index'), {
+            q: data.q,
+            status: data.status,
+            payment_method: data.payment_method,
+        }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    };
+
+    const clear = () => {
+        setData({ q: '', status: '', payment_method: '' });
+
+        router.get(route('reports.transactions.index'), {
+            q: '',
+            status: '',
+            payment_method: '',
+        }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -22,6 +60,16 @@ export default function TransactionLedgerIndex({ ledger }) {
                     >
                         Kembali ke Reports
                     </Link>
+                    <Link
+                        href={route('reports.transactions.export', {
+                            q: filters.q,
+                            status: filters.status,
+                            payment_method: filters.payment_method,
+                        })}
+                        className="inline-flex w-fit rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
+                    >
+                        Export CSV
+                    </Link>
                 </div>
             }
         >
@@ -34,10 +82,53 @@ export default function TransactionLedgerIndex({ ledger }) {
                         <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
                             Ledger ini menampilkan invoice, line items, pembayaran, dan sisa saldo agar admin bisa melakukan drill-down transaksi tanpa membuka payload mentah.
                         </p>
+
+                        <form onSubmit={submit} className="mt-5 grid gap-3 md:grid-cols-[1.4fr,0.8fr,0.8fr,auto,auto]">
+                            <input
+                                className="block w-full rounded-full border border-white/10 bg-zinc-950/70 px-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-0"
+                                placeholder="Cari invoice code atau customer"
+                                value={data.q}
+                                onChange={(event) => setData('q', event.target.value)}
+                            />
+                            <select
+                                className="rounded-full border border-white/10 bg-zinc-950/70 px-4 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0"
+                                value={data.status}
+                                onChange={(event) => setData('status', event.target.value)}
+                            >
+                                <option value="">Semua status</option>
+                                {statusOptions.map((status) => (
+                                    <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="rounded-full border border-white/10 bg-zinc-950/70 px-4 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0"
+                                value={data.payment_method}
+                                onChange={(event) => setData('payment_method', event.target.value)}
+                            >
+                                <option value="">Semua payment method</option>
+                                {paymentMethodOptions.filter(Boolean).map((paymentMethod) => (
+                                    <option key={paymentMethod} value={paymentMethod}>{paymentMethod}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="inline-flex rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:opacity-50"
+                            >
+                                Search
+                            </button>
+                            <button
+                                type="button"
+                                onClick={clear}
+                                className="inline-flex rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+                            >
+                                Clear
+                            </button>
+                        </form>
                     </div>
 
                     <div className="grid gap-6">
-                        {ledger.map((invoice) => (
+                        {ledger.data.map((invoice) => (
                             <section key={invoice.id} className="rounded-3xl border border-white/10 bg-white/5 p-6">
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
@@ -86,6 +177,25 @@ export default function TransactionLedgerIndex({ ledger }) {
                                     </div>
                                 </div>
                             </section>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        {ledger.links.map((link, index) => (
+                            link.url ? (
+                                <Link
+                                    key={`${link.label}-${index}`}
+                                    href={link.url}
+                                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${link.active ? 'bg-emerald-400 text-zinc-950' : 'border border-white/15 text-white hover:bg-white/10'}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ) : (
+                                <span
+                                    key={`${link.label}-${index}`}
+                                    className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-500"
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            )
                         ))}
                     </div>
                 </div>

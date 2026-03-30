@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\CustomerHistoryController;
@@ -38,17 +39,34 @@ Route::get('/reports', ReportController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
     ->name('reports.index');
 
+Route::get('/reports/export', [ReportController::class, 'export'])
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('reports.export');
+
 Route::middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
     ->prefix('reports/customers')
     ->name('reports.customers.')
     ->group(function () {
         Route::get('/', [CustomerHistoryController::class, 'index'])->name('index');
+        Route::get('/export', [CustomerHistoryController::class, 'export'])->name('export');
         Route::get('/{customer}', [CustomerHistoryController::class, 'show'])->name('show');
     });
 
 Route::get('/reports/transactions', TransactionLedgerController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
     ->name('reports.transactions.index');
+
+Route::get('/reports/transactions/export', [TransactionLedgerController::class, 'export'])
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('reports.transactions.export');
+
+Route::get('/reports/audit', [AuditLogController::class, 'index'])
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('reports.audit.index');
+
+Route::get('/reports/audit/export', [AuditLogController::class, 'export'])
+    ->middleware(['auth', 'staff', 'permission:'.Permission::ACCESS_ADMIN])
+    ->name('reports.audit.export');
 
 Route::get('/management', ManagementController::class)
     ->middleware(['auth', 'staff', 'permission:'.Permission::MANAGE_MASTER_DATA])

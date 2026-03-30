@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 
 const formatRupiah = (amount) => new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -17,7 +17,29 @@ const summaryCards = [
     ['paidInvoices', 'Paid invoices'],
 ];
 
-export default function ReportsIndex({ summary, bookingSummary, paymentMethodSummary, invoiceSummary }) {
+const dateScopeOptions = [
+    { value: 'all', label: 'Semua data' },
+    { value: 'today', label: 'Hari ini' },
+    { value: 'last_7_days', label: '7 hari terakhir' },
+];
+
+export default function ReportsIndex({ summary, bookingSummary, paymentMethodSummary, invoiceSummary, filters }) {
+    const { data, setData, processing } = useForm({
+        date_scope: filters.date_scope ?? 'all',
+    });
+
+    const submit = (event) => {
+        event.preventDefault();
+
+        router.get(route('reports.index'), {
+            date_scope: data.date_scope,
+        }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -44,6 +66,12 @@ export default function ReportsIndex({ summary, bookingSummary, paymentMethodSum
                     >
                         Buka Transaction Ledger
                     </Link>
+                    <Link
+                        href={route('reports.export', { date_scope: filters.date_scope })}
+                        className="inline-flex w-fit rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
+                    >
+                        Export CSV
+                    </Link>
                 </div>
             }
         >
@@ -51,6 +79,33 @@ export default function ReportsIndex({ summary, bookingSummary, paymentMethodSum
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+                    <form onSubmit={submit} className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 lg:p-8">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold text-white">Date scope</h2>
+                                <p className="mt-2 text-sm text-zinc-400">Gunakan filter waktu untuk membatasi summary operasional dan komersial.</p>
+                            </div>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                <select
+                                    className="rounded-full border border-white/10 bg-zinc-950/70 px-4 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0"
+                                    value={data.date_scope}
+                                    onChange={(event) => setData('date_scope', event.target.value)}
+                                >
+                                    {dateScopeOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="inline-flex rounded-full bg-emerald-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:opacity-50"
+                                >
+                                    Terapkan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
                     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                         {summaryCards.map(([key, label]) => (
                             <div key={key} className="rounded-3xl border border-white/10 bg-white/5 p-6">
