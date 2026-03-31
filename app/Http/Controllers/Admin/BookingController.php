@@ -39,6 +39,7 @@ class BookingController extends Controller
             ->where('service_type', Service::TYPE_TIMED_UNIT)
             ->whereHas('bookingPolicy')
             ->with([
+                'bookingPolicy',
                 'units' => fn ($query) => $query
                     ->where('is_active', true)
                     ->where('is_bookable', true)
@@ -52,6 +53,11 @@ class BookingController extends Controller
                 'id' => $service->id,
                 'code' => $service->code,
                 'name' => $service->name,
+                'bookingPolicy' => [
+                    'slotIntervalMinutes' => $service->bookingPolicy?->slot_interval_minutes,
+                    'minDurationMinutes' => $service->bookingPolicy?->min_duration_minutes,
+                    'maxDurationMinutes' => $service->bookingPolicy?->max_duration_minutes,
+                ],
                 'units' => $service->units->map(fn ($unit) => [
                     'id' => $unit->id,
                     'code' => $unit->code,

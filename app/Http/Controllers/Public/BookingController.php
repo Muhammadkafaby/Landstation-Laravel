@@ -59,6 +59,7 @@ class BookingController extends Controller
                 }
             })
             ->with([
+                'bookingPolicy',
                 'units' => fn ($query) => $query
                     ->where('is_active', true)
                     ->where('is_bookable', true)
@@ -72,6 +73,11 @@ class BookingController extends Controller
                 'id' => $service->id,
                 'code' => $service->code,
                 'name' => $service->name,
+                'bookingPolicy' => [
+                    'slotIntervalMinutes' => $service->bookingPolicy?->slot_interval_minutes,
+                    'minDurationMinutes' => $service->bookingPolicy?->min_duration_minutes,
+                    'maxDurationMinutes' => $service->bookingPolicy?->max_duration_minutes,
+                ],
                 'layout' => [
                     'mode' => $service->layout_mode,
                     'canvasWidth' => $service->layout_canvas_width,

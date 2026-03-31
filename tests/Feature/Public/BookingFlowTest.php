@@ -27,6 +27,9 @@ test('guests can access the public booking create page', function () {
             ->where('serviceOptions.0.layout.mode', 'manual_grid')
             ->where('serviceOptions.0.layout.canvasWidth', 1440)
             ->where('serviceOptions.0.units.0.layout.x', 80)
+            ->where('serviceOptions.0.bookingPolicy.slotIntervalMinutes', 60)
+            ->where('serviceOptions.0.bookingPolicy.minDurationMinutes', 60)
+            ->where('serviceOptions.0.bookingPolicy.maxDurationMinutes', 240)
         );
 });
 
@@ -207,4 +210,80 @@ test('public booking create rejects customers with too many active holds', funct
         ]))
         ->assertRedirect(route('bookings.create'))
         ->assertSessionHasErrors('customer_phone');
+});
+
+test('public booking create rejects start time outside today and tomorrow window', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    $this->from(route('bookings.create'))
+        ->post(route('bookings.store'), [
+            'customer_name' => 'Window Start',
+            'customer_phone' => '081234567893',
+            'customer_email' => 'window-start@example.com',
+            'service_id' => $service->id,
+            'service_unit_id' => $unit->id,
+            'start_at' => '2026-04-04 12:00:00',
+            'end_at' => '2026-04-04 13:00:00',
+            'notes' => 'Outside day window',
+        ])
+        ->assertRedirect(route('bookings.create'))
+        ->assertSessionHasErrors('start_at');
+});
+
+test('public booking create rejects end time outside today and tomorrow window', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    $this->from(route('bookings.create'))
+        ->post(route('bookings.store'), [
+            'customer_name' => 'Window End',
+            'customer_phone' => '081234567894',
+            'customer_email' => 'window-end@example.com',
+            'service_id' => $service->id,
+            'service_unit_id' => $unit->id,
+            'start_at' => '2026-04-03 22:00:00',
+            'end_at' => '2026-04-04 02:00:00',
+            'notes' => 'Crosses beyond tomorrow',
+        ])
+        ->assertRedirect(route('bookings.create'))
+        ->assertSessionHasErrors('end_at');
+});
+
+test('public booking create rejects start time before opening hour', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    $this->from(route('bookings.create'))
+        ->post(route('bookings.store'), [
+            'customer_name' => 'Opening Hour',
+            'customer_phone' => '081234567895',
+            'customer_email' => 'opening-hour@example.com',
+            'service_id' => $service->id,
+            'service_unit_id' => $unit->id,
+            'start_at' => '2026-04-03 08:00:00',
+            'end_at' => '2026-04-03 09:00:00',
+            'notes' => 'Before open hour',
+        ])
+        ->assertRedirect(route('bookings.create'))
+        ->assertSessionHasErrors('start_at');
+});
+
+test('public booking create rejects booking that ends after 11 pm', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    $this->from(route('bookings.create'))
+        ->post(route('bookings.store'), [
+            'customer_name' => 'Closing Hour',
+            'customer_phone' => '081234567896',
+            'customer_email' => 'closing-hour@example.com',
+            'service_id' => $service->id,
+            'service_unit_id' => $unit->id,
+            'start_at' => '2026-04-02 20:00:00',
+            'end_at' => '2026-04-03 00:00:00',
+            'notes' => 'Beyond 11 PM',
+        ])
+        ->assertRedirect(route('bookings.create'))
+        ->assertSessionHasErrors('end_at');
 });
