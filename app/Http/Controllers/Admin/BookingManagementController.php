@@ -14,7 +14,35 @@ class BookingManagementController extends Controller
 {
     public function index(): Response
     {
+        $serverNow = now();
+
         return Inertia::render('Admin/Bookings/Index', [
+            'serverNow' => $serverNow->toIso8601String(),
+            'heldQueue' => Booking::query()
+                ->with(['customer:id,name,phone', 'service:id,name,code', 'unit:id,name,code'])
+                ->where('status', Booking::STATUS_HELD)
+                ->whereNotNull('hold_expires_at')
+                ->where('hold_expires_at', '>', $serverNow)
+                ->orderBy('hold_expires_at')
+                ->limit(8)
+                ->get()
+                ->map(fn (Booking $booking) => [
+                    'id' => $booking->id,
+                    'bookingCode' => $booking->booking_code,
+                    'customerName' => $booking->customer?->name,
+                    'customerPhone' => $booking->customer?->phone,
+                    'serviceName' => $booking->service?->name,
+                    'serviceCode' => $booking->service?->code,
+                    'unitName' => $booking->unit?->name,
+                    'unitCode' => $booking->unit?->code,
+                    'status' => $booking->runtimeStatus(),
+                    'holdExpiresAt' => optional($booking->hold_expires_at)->toIso8601String(),
+                    'remainingSeconds' => max(0, $serverNow->diffInSeconds($booking->hold_expires_at, false)),
+                    'source' => $booking->booking_source,
+                    'startAt' => optional($booking->start_at)->toIso8601String(),
+                    'endAt' => optional($booking->end_at)->toIso8601String(),
+                ])
+                ->values(),
             'bookings' => Booking::query()
                 ->with(['customer:id,name,phone', 'service:id,name,code', 'unit:id,name,code'])
                 ->withCount('serviceSessions')

@@ -106,6 +106,56 @@ test('booking management index paginates booking summaries', function () {
         );
 });
 
+test('booking management index exposes active held queue with countdown data', function () {
+    $cashier = User::factory()->create([
+        'role_id' => Role::query()->where('code', Role::CASHIER)->value('id'),
+    ]);
+    $customer = Customer::query()->create([
+        'name' => 'Queue Customer',
+        'phone' => '081200000031',
+    ]);
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+    $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();
+
+    Booking::query()->create([
+        'booking_code' => 'BK-HELD-001',
+        'customer_id' => $customer->id,
+        'service_id' => $service->id,
+        'service_unit_id' => $unit->id,
+        'status' => Booking::STATUS_HELD,
+        'booking_source' => Booking::SOURCE_PUBLIC,
+        'start_at' => CarbonImmutable::parse('2026-04-03 14:00:00'),
+        'end_at' => CarbonImmutable::parse('2026-04-03 15:00:00'),
+        'duration_minutes' => 60,
+        'hold_expires_at' => CarbonImmutable::parse('2026-04-02 10:05:00'),
+    ]);
+
+    Booking::query()->create([
+        'booking_code' => 'BK-HELD-EXPIRED',
+        'customer_id' => $customer->id,
+        'service_id' => $service->id,
+        'service_unit_id' => $unit->id,
+        'status' => Booking::STATUS_HELD,
+        'booking_source' => Booking::SOURCE_PUBLIC,
+        'start_at' => CarbonImmutable::parse('2026-04-03 16:00:00'),
+        'end_at' => CarbonImmutable::parse('2026-04-03 17:00:00'),
+        'duration_minutes' => 60,
+        'hold_expires_at' => CarbonImmutable::parse('2026-04-02 09:59:00'),
+    ]);
+
+    $this->actingAs($cashier)
+        ->get(route('management.bookings.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Bookings/Index')
+            ->where('serverNow', '2026-04-02T10:00:00+00:00')
+            ->has('heldQueue', 1)
+            ->where('heldQueue.0.bookingCode', 'BK-HELD-001')
+            ->where('heldQueue.0.remainingSeconds', 300)
+            ->where('heldQueue.0.status', Booking::STATUS_HELD)
+        );
+});
+
 test('non staff users can not access the internal booking create page', function () {
     $user = User::factory()->create();
 
