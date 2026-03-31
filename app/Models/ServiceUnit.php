@@ -28,9 +28,23 @@ class ServiceUnit extends Model
         'zone',
         'status',
         'capacity',
+        'layout_x',
+        'layout_y',
+        'layout_w',
+        'layout_h',
+        'layout_rotation',
+        'layout_z_index',
+        'layout_meta_json',
         'is_bookable',
         'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'layout_meta_json' => 'array',
+        ];
+    }
 
     public function service(): BelongsTo
     {

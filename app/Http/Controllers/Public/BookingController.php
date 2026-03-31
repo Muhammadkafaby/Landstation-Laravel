@@ -55,11 +55,28 @@ class BookingController extends Controller
                 'id' => $service->id,
                 'code' => $service->code,
                 'name' => $service->name,
+                'layout' => [
+                    'mode' => $service->layout_mode,
+                    'canvasWidth' => $service->layout_canvas_width,
+                    'canvasHeight' => $service->layout_canvas_height,
+                    'backgroundImagePath' => $service->layout_background_image_path,
+                    'meta' => $service->layout_meta_json ?? [],
+                ],
                 'units' => $service->units->map(fn ($unit) => [
                     'id' => $unit->id,
                     'code' => $unit->code,
                     'name' => $unit->name,
                     'zone' => $unit->zone,
+                    'status' => $unit->status,
+                    'layout' => [
+                        'x' => $unit->layout_x,
+                        'y' => $unit->layout_y,
+                        'w' => $unit->layout_w,
+                        'h' => $unit->layout_h,
+                        'rotation' => $unit->layout_rotation,
+                        'zIndex' => $unit->layout_z_index,
+                        'meta' => $unit->layout_meta_json ?? [],
+                    ],
                 ])->values(),
             ])
             ->values()

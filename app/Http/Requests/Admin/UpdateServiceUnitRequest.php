@@ -35,6 +35,13 @@ class UpdateServiceUnitRequest extends FormRequest
                 ServiceUnit::STATUS_INACTIVE,
             ])],
             'capacity' => ['nullable', 'integer', 'min:1'],
+            'layout_x' => ['nullable', 'integer'],
+            'layout_y' => ['nullable', 'integer'],
+            'layout_w' => ['nullable', 'integer', 'min:1'],
+            'layout_h' => ['nullable', 'integer', 'min:1'],
+            'layout_rotation' => ['nullable', 'integer'],
+            'layout_z_index' => ['nullable', 'integer'],
+            'layout_meta_json' => ['nullable', 'array'],
             'is_bookable' => ['required', 'boolean'],
             'is_active' => ['required', 'boolean'],
         ];

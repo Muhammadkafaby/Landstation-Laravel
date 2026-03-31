@@ -29,6 +29,9 @@ test('admins can access the service catalog management page', function () {
             ->has('categories', 4)
             ->has('services', 4)
             ->has('units', 5)
+            ->where('services.0.layoutMode', 'manual_grid')
+            ->where('services.0.layoutCanvasWidth', 960)
+            ->where('units.0.layoutX', 120)
             ->has('options.unitStatuses', 5)
             ->has('pricingRules', 5)
             ->has('bookingPolicies', 3)
@@ -122,6 +125,9 @@ test('admins can create services', function () {
             'slug' => 'playstation-vip',
             'service_type' => Service::TYPE_TIMED_UNIT,
             'billing_type' => Service::BILLING_PER_MINUTE,
+            'layout_mode' => 'manual_grid',
+            'layout_canvas_width' => 1440,
+            'layout_canvas_height' => 900,
             'sort_order' => 50,
             'is_active' => true,
         ])
@@ -132,6 +138,9 @@ test('admins can create services', function () {
         'slug' => 'playstation-vip',
         'name' => 'PlayStation VIP',
         'service_category_id' => $category->id,
+        'layout_mode' => 'manual_grid',
+        'layout_canvas_width' => 1440,
+        'layout_canvas_height' => 900,
     ]);
 });
 
@@ -255,6 +264,12 @@ test('admins can update service units', function () {
             'zone' => 'VIP Billiard Zone',
             'status' => ServiceUnit::STATUS_MAINTENANCE,
             'capacity' => 6,
+            'layout_x' => 420,
+            'layout_y' => 160,
+            'layout_w' => 180,
+            'layout_h' => 100,
+            'layout_rotation' => 10,
+            'layout_z_index' => 3,
             'is_bookable' => false,
             'is_active' => true,
         ])
@@ -266,6 +281,12 @@ test('admins can update service units', function () {
         'zone' => 'VIP Billiard Zone',
         'status' => ServiceUnit::STATUS_MAINTENANCE,
         'capacity' => 6,
+        'layout_x' => 420,
+        'layout_y' => 160,
+        'layout_w' => 180,
+        'layout_h' => 100,
+        'layout_rotation' => 10,
+        'layout_z_index' => 3,
         'is_bookable' => false,
     ]);
 });

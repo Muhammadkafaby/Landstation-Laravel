@@ -27,9 +27,21 @@ class Service extends Model
         'slug',
         'service_type',
         'billing_type',
+        'layout_mode',
+        'layout_canvas_width',
+        'layout_canvas_height',
+        'layout_background_image_path',
+        'layout_meta_json',
         'is_active',
         'sort_order',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'layout_meta_json' => 'array',
+        ];
+    }
 
     public function category(): BelongsTo
     {

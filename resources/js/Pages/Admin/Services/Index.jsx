@@ -87,6 +87,12 @@ function UnitForm({ unit, unitServices, unitStatuses, routeName, submitLabel }) 
         zone: unit?.zone ?? '',
         status: unit?.status ?? unitStatuses[0]?.value ?? '',
         capacity: unit?.capacity ?? '',
+        layout_x: unit?.layoutX ?? '',
+        layout_y: unit?.layoutY ?? '',
+        layout_w: unit?.layoutW ?? '',
+        layout_h: unit?.layoutH ?? '',
+        layout_rotation: unit?.layoutRotation ?? '',
+        layout_z_index: unit?.layoutZIndex ?? '',
         is_bookable: unit?.isBookable ?? true,
         is_active: unit?.isActive ?? true,
     });
@@ -183,6 +189,78 @@ function UnitForm({ unit, unitServices, unitStatuses, routeName, submitLabel }) 
                         onChange={(event) => setData('capacity', event.target.value === '' ? '' : Number(event.target.value))}
                     />
                     <InputError className="mt-2" message={errors.capacity} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor={`${routeName}-layout-x`} value="Layout X" />
+                    <TextInput
+                        id={`${routeName}-layout-x`}
+                        type="number"
+                        className="mt-1 block w-full"
+                        value={data.layout_x}
+                        onChange={(event) => setData('layout_x', event.target.value === '' ? '' : Number(event.target.value))}
+                    />
+                    <InputError className="mt-2" message={errors.layout_x} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor={`${routeName}-layout-y`} value="Layout Y" />
+                    <TextInput
+                        id={`${routeName}-layout-y`}
+                        type="number"
+                        className="mt-1 block w-full"
+                        value={data.layout_y}
+                        onChange={(event) => setData('layout_y', event.target.value === '' ? '' : Number(event.target.value))}
+                    />
+                    <InputError className="mt-2" message={errors.layout_y} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor={`${routeName}-layout-w`} value="Layout width" />
+                    <TextInput
+                        id={`${routeName}-layout-w`}
+                        type="number"
+                        className="mt-1 block w-full"
+                        value={data.layout_w}
+                        onChange={(event) => setData('layout_w', event.target.value === '' ? '' : Number(event.target.value))}
+                    />
+                    <InputError className="mt-2" message={errors.layout_w} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor={`${routeName}-layout-h`} value="Layout height" />
+                    <TextInput
+                        id={`${routeName}-layout-h`}
+                        type="number"
+                        className="mt-1 block w-full"
+                        value={data.layout_h}
+                        onChange={(event) => setData('layout_h', event.target.value === '' ? '' : Number(event.target.value))}
+                    />
+                    <InputError className="mt-2" message={errors.layout_h} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor={`${routeName}-layout-rotation`} value="Rotation" />
+                    <TextInput
+                        id={`${routeName}-layout-rotation`}
+                        type="number"
+                        className="mt-1 block w-full"
+                        value={data.layout_rotation}
+                        onChange={(event) => setData('layout_rotation', event.target.value === '' ? '' : Number(event.target.value))}
+                    />
+                    <InputError className="mt-2" message={errors.layout_rotation} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor={`${routeName}-layout-z-index`} value="Z-index" />
+                    <TextInput
+                        id={`${routeName}-layout-z-index`}
+                        type="number"
+                        className="mt-1 block w-full"
+                        value={data.layout_z_index}
+                        onChange={(event) => setData('layout_z_index', event.target.value === '' ? '' : Number(event.target.value))}
+                    />
+                    <InputError className="mt-2" message={errors.layout_z_index} />
                 </div>
 
                 <label className="flex items-center gap-3 rounded-md border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
