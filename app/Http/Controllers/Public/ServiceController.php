@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use App\Models\ServicePricingRule;
 use App\Models\ServiceUnit;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -36,11 +37,10 @@ class ServiceController extends Controller
             ->get()
             ->map(function (ServiceCategory $category): array {
                 $services = $category->services->map(function (Service $service): array {
-                    $startingPriceRupiah = $service->pricingRules
-                        ->map(function ($pricingRule): int {
-                            return (int) ($pricingRule->price_per_interval_rupiah ?? $pricingRule->base_price_rupiah);
-                        })
-                        ->filter(fn (int $value): bool => $value > 0)
+                    $weekdayPrice = $this->priceForDayType($service, ServicePricingRule::DAY_TYPE_WEEKDAY);
+                    $weekendPrice = $this->priceForDayType($service, ServicePricingRule::DAY_TYPE_WEEKEND);
+                    $startingPriceRupiah = collect([$weekdayPrice, $weekendPrice])
+                        ->filter(fn (?int $value): bool => filled($value) && $value > 0)
                         ->min();
 
                     return [
@@ -53,6 +53,8 @@ class ServiceController extends Controller
                         'hasPricing' => $service->pricing_rules_count > 0,
                         'hasBookingPolicy' => $service->booking_policy_count > 0,
                         'startingPriceRupiah' => $startingPriceRupiah,
+                        'weekdayPriceRupiah' => $weekdayPrice,
+                        'weekendPriceRupiah' => $weekendPrice,
                     ];
                 })->values();
 
@@ -75,5 +77,16 @@ class ServiceController extends Controller
             ],
             'categories' => $categories,
         ]);
+    }
+
+    protected function priceForDayType(Service $service, string $dayType): ?int
+    {
+        return $service->pricingRules
+            ->where('day_type', $dayType)
+            ->map(function ($pricingRule): int {
+                return (int) ($pricingRule->price_per_interval_rupiah ?? $pricingRule->base_price_rupiah);
+            })
+            ->filter(fn (int $value): bool => $value > 0)
+            ->min();
     }
 }

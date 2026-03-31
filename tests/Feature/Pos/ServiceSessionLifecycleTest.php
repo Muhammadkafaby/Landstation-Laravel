@@ -32,7 +32,7 @@ test('cashiers can access the pos sessions page', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Pos/Sessions/Index')
-            ->has('serviceOptions', 3)
+            ->has('serviceOptions', 5)
             ->has('activeSessions', 0)
         );
 });
@@ -59,7 +59,9 @@ test('cashiers can start a walk in timed service session', function () {
     expect($session->status)->toBe(ServiceSession::STATUS_ACTIVE)
         ->and($session->booking_id)->toBeNull()
         ->and($session->started_by_user_id)->toBe($cashier->id)
-        ->and($session->pricing_snapshot_json)->not->toBeNull();
+        ->and($session->pricing_snapshot_json)->not->toBeNull()
+        ->and($session->pricing_snapshot_json['price_per_interval_rupiah'])->toBe(12000)
+        ->and($session->pricing_snapshot_json['day_type'])->toBe('weekend');
 });
 
 test('starting a linked booking session checks the booking in', function () {

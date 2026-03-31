@@ -22,13 +22,13 @@ test('dashboard exposes operational summary for admins', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Dashboard/Index')
             ->where('summary.categories', 4)
-            ->where('summary.services', 4)
-            ->where('summary.timedServices', 3)
+            ->where('summary.services', 6)
+            ->where('summary.timedServices', 5)
             ->where('summary.menuServices', 1)
-            ->where('summary.units', 5)
-            ->where('summary.bookableUnits', 5)
-            ->where('summary.pricingRules', 5)
-            ->where('summary.bookingPolicies', 3)
+            ->where('summary.units', 43)
+            ->where('summary.bookableUnits', 43)
+            ->where('summary.pricingRules', 11)
+            ->where('summary.bookingPolicies', 5)
             ->has('categories', 4)
         );
 });
@@ -44,9 +44,9 @@ test('dashboard exposes category operational cards for super admins', function (
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Dashboard/Index')
             ->where('categories.2.code', 'playstation')
-            ->where('categories.2.featuredService.name', 'PlayStation Regular')
-            ->where('categories.2.featuredService.unitsCount', 2)
-            ->where('categories.2.featuredService.startingPriceRupiah', 15000)
+            ->where('categories.2.featuredService.name', 'PS-4')
+            ->where('categories.2.featuredService.unitsCount', 4)
+            ->where('categories.2.featuredService.startingPriceRupiah', 10000)
             ->where('categories.2.featuredService.hasBookingPolicy', true)
         );
 });

@@ -23,9 +23,9 @@ test('guests can access the public booking create page', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Public/Bookings/Create')
-            ->has('serviceOptions', 3)
+            ->has('serviceOptions', 5)
             ->where('serviceOptions.0.layout.mode', 'manual_grid')
-            ->where('serviceOptions.0.layout.canvasWidth', 960)
+            ->where('serviceOptions.0.layout.canvasWidth', 1440)
             ->where('serviceOptions.0.units.0.layout.x', 80)
         );
 });

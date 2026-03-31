@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,10 @@ class ServicePricingRule extends Model
 {
     use HasFactory;
 
+    public const DAY_TYPE_WEEKDAY = 'weekday';
+
+    public const DAY_TYPE_WEEKEND = 'weekend';
+
     public const MODEL_PER_INTERVAL = 'per_interval';
 
     public const MODEL_FLAT = 'flat';
@@ -17,6 +22,7 @@ class ServicePricingRule extends Model
     protected $fillable = [
         'service_id',
         'service_unit_id',
+        'day_type',
         'pricing_model',
         'billing_interval_minutes',
         'base_price_rupiah',
@@ -35,6 +41,13 @@ class ServicePricingRule extends Model
             'ends_at' => 'datetime',
             'is_active' => 'boolean',
         ];
+    }
+
+    public static function resolveDayType(CarbonInterface $dateTime): string
+    {
+        return $dateTime->isWeekend()
+            ? self::DAY_TYPE_WEEKEND
+            : self::DAY_TYPE_WEEKDAY;
     }
 
     public function service(): BelongsTo

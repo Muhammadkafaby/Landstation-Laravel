@@ -115,8 +115,13 @@ export default function ServicesIndex({ summary, categories }) {
                                                     </p>
                                                 </div>
 
-                                                <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
-                                                    {formatRupiah(service.startingPriceRupiah)}
+                                                <div className="grid gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
+                                                    <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-300">
+                                                        Weekday · {formatRupiah(service.weekdayPriceRupiah ?? service.startingPriceRupiah)}
+                                                    </div>
+                                                    <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-fuchsia-200">
+                                                        Weekend · {formatRupiah(service.weekendPriceRupiah ?? service.startingPriceRupiah)}
+                                                    </div>
                                                 </div>
                                             </div>
 

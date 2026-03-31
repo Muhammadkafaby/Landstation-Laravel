@@ -22,10 +22,10 @@ test('management index exposes seeded master data summary for admins', function 
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Management/Index')
             ->where('summary.categories', 4)
-            ->where('summary.services', 4)
-            ->where('summary.units', 5)
-            ->where('summary.pricingRules', 5)
-            ->where('summary.bookingPolicies', 3)
+            ->where('summary.services', 6)
+            ->where('summary.units', 43)
+            ->where('summary.pricingRules', 11)
+            ->where('summary.bookingPolicies', 5)
             ->has('categories', 4)
             ->has('categories.0.services')
         );
@@ -44,8 +44,8 @@ test('management index exposes service-level read model for seeded categories', 
             ->has('categories', 4)
             ->where('categories.0.code', 'billiard')
             ->where('categories.0.services.0.code', 'billiard-regular')
-            ->where('categories.0.services.0.units_count', 2)
-            ->where('categories.0.services.0.pricing_rules_count', 1)
+            ->where('categories.0.services.0.units_count', 4)
+            ->where('categories.0.services.0.pricing_rules_count', 2)
             ->where('categories.0.services.0.has_booking_policy', true)
         );
 });

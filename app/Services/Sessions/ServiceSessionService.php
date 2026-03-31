@@ -154,6 +154,7 @@ class ServiceSessionService
         $pricingRule = ServicePricingRule::query()
             ->where('service_id', $service->id)
             ->where('is_active', true)
+            ->where('day_type', ServicePricingRule::resolveDayType($startedAt))
             ->where(function ($query) use ($unit): void {
                 $query->where('service_unit_id', $unit->id)
                     ->orWhereNull('service_unit_id');
@@ -177,6 +178,7 @@ class ServiceSessionService
         return [
             'pricing_rule_id' => $pricingRule->id,
             'pricing_model' => $pricingRule->pricing_model,
+            'day_type' => $pricingRule->day_type,
             'billing_interval_minutes' => $pricingRule->billing_interval_minutes,
             'base_price_rupiah' => $pricingRule->base_price_rupiah,
             'price_per_interval_rupiah' => $pricingRule->price_per_interval_rupiah,

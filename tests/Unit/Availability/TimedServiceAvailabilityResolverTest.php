@@ -34,7 +34,7 @@ test('resolver returns active bookable available units for a timed service', fun
         CarbonImmutable::parse('2026-04-03 15:00:00'),
     );
 
-    expect($availableUnits->pluck('code')->all())->toBe(['ps-01', 'ps-02']);
+    expect($availableUnits->pluck('code')->all())->toBe(['ps-01', 'ps-02', 'ps-03', 'ps-04']);
 });
 
 test('resolver excludes units blocked by overlapping bookings and active sessions', function () {
@@ -78,7 +78,7 @@ test('resolver excludes units blocked by overlapping bookings and active session
         CarbonImmutable::parse('2026-04-03 15:30:00'),
     );
 
-    expect($availableUnits)->toHaveCount(0);
+    expect($availableUnits->pluck('code')->all())->toBe(['ps-03', 'ps-04']);
 });
 
 test('resolver ignores terminal bookings and closed sessions when computing availability', function () {
@@ -124,7 +124,7 @@ test('resolver ignores terminal bookings and closed sessions when computing avai
         CarbonImmutable::parse('2026-04-03 15:00:00'),
     );
 
-    expect($availableUnits->pluck('code')->all())->toBe(['ps-01', 'ps-02']);
+    expect($availableUnits->pluck('code')->all())->toBe(['ps-01', 'ps-02', 'ps-03', 'ps-04']);
 });
 
 test('resolver ignores held bookings that are already expired', function () {

@@ -139,6 +139,7 @@ class BookingCreator
         $pricingRule = ServicePricingRule::query()
             ->where('service_id', $service->id)
             ->where('is_active', true)
+            ->where('day_type', ServicePricingRule::resolveDayType($startAt))
             ->where(function ($query) use ($unit): void {
                 if ($unit !== null) {
                     $query->where('service_unit_id', $unit->id)
@@ -168,6 +169,7 @@ class BookingCreator
         return [
             'pricing_rule_id' => $pricingRule->id,
             'pricing_model' => $pricingRule->pricing_model,
+            'day_type' => $pricingRule->day_type,
             'billing_interval_minutes' => $pricingRule->billing_interval_minutes,
             'base_price_rupiah' => $pricingRule->base_price_rupiah,
             'price_per_interval_rupiah' => $pricingRule->price_per_interval_rupiah,

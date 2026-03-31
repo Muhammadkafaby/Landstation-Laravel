@@ -31,7 +31,7 @@ test('admins can access the internal booking create page', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Bookings/Create')
-            ->has('serviceOptions', 3)
+            ->has('serviceOptions', 5)
         );
 });
 

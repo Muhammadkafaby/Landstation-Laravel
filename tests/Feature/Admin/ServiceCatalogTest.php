@@ -27,14 +27,14 @@ test('admins can access the service catalog management page', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Services/Index')
             ->has('categories', 4)
-            ->has('services', 4)
-            ->has('units', 5)
+            ->has('services', 6)
+            ->has('units', 43)
             ->where('services.0.layoutMode', 'manual_grid')
-            ->where('services.0.layoutCanvasWidth', 960)
+            ->where('services.0.layoutCanvasWidth', 1440)
             ->where('units.0.layoutX', 120)
             ->has('options.unitStatuses', 5)
-            ->has('pricingRules', 5)
-            ->has('bookingPolicies', 3)
+            ->has('pricingRules', 11)
+            ->has('bookingPolicies', 5)
             ->has('options.pricingModels', 2)
         );
 });
@@ -157,7 +157,7 @@ test('service create validates duplicate code and slug', function () {
             'service_category_id' => $category->id,
             'code' => 'ps-regular',
             'name' => 'PlayStation Duplicate',
-            'slug' => 'playstation-regular',
+            'slug' => 'ps-4',
             'service_type' => Service::TYPE_TIMED_UNIT,
             'billing_type' => Service::BILLING_PER_MINUTE,
             'sort_order' => 50,
@@ -207,8 +207,8 @@ test('admins can create service units', function () {
     $this->actingAs($admin)
         ->post(route('management.service-units.store'), [
             'service_id' => $service->id,
-            'code' => 'ps-03',
-            'name' => 'PS Room 03',
+            'code' => 'ps-05',
+            'name' => 'PS-4 Unit 05',
             'zone' => 'PlayStation Zone',
             'status' => ServiceUnit::STATUS_AVAILABLE,
             'capacity' => 4,
@@ -219,8 +219,8 @@ test('admins can create service units', function () {
 
     $this->assertDatabaseHas('service_units', [
         'service_id' => $service->id,
-        'code' => 'ps-03',
-        'name' => 'PS Room 03',
+        'code' => 'ps-05',
+        'name' => 'PS-4 Unit 05',
         'status' => ServiceUnit::STATUS_AVAILABLE,
     ]);
 });
