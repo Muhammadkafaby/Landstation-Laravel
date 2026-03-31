@@ -36,8 +36,8 @@ function hasManualLayout(service, units) {
 }
 
 function minimumManualCanvasWidth(units, canvasWidth) {
-    const minimumUnitWidth = 88;
-    const minimumUnitHeight = 72;
+    const minimumUnitWidth = 136;
+    const minimumUnitHeight = 102;
 
     const scale = units.reduce((largestScale, unit) => {
         const unitWidth = Math.max(unit.layout?.w ?? 180, 1);
@@ -53,6 +53,47 @@ function minimumManualCanvasWidth(units, canvasWidth) {
     return Math.ceil(canvasWidth * scale);
 }
 
+function resolveManualCanvasSize(service, units, fallbackWidth, fallbackHeight) {
+    const configuredWidth = service?.layout?.canvasWidth ?? fallbackWidth;
+    const configuredHeight = service?.layout?.canvasHeight ?? fallbackHeight;
+    const hasBackgroundImage = Boolean(service?.layout?.backgroundImagePath);
+
+    if (units.length === 0) {
+        return {
+            canvasWidth: configuredWidth,
+            canvasHeight: configuredHeight,
+        };
+    }
+
+    const maxRight = units.reduce((largestRight, unit) => {
+        const x = Number(unit.layout?.x ?? 0);
+        const width = Number(unit.layout?.w ?? 180);
+
+        return Math.max(largestRight, x + width);
+    }, 0);
+
+    const maxBottom = units.reduce((largestBottom, unit) => {
+        const y = Number(unit.layout?.y ?? 0);
+        const height = Number(unit.layout?.h ?? 110);
+
+        return Math.max(largestBottom, y + height);
+    }, 0);
+
+    const contentPadding = 96;
+
+    if (hasBackgroundImage) {
+        return {
+            canvasWidth: Math.max(configuredWidth, maxRight + contentPadding),
+            canvasHeight: Math.max(configuredHeight, maxBottom + contentPadding),
+        };
+    }
+
+    return {
+        canvasWidth: Math.max(640, maxRight + contentPadding),
+        canvasHeight: Math.max(420, maxBottom + contentPadding),
+    };
+}
+
 function PositionedUnitButton({ unit, canvasWidth, canvasHeight, selected, onSelect }) {
     const width = unit.layout?.w ?? 180;
     const height = unit.layout?.h ?? 110;
@@ -65,7 +106,7 @@ function PositionedUnitButton({ unit, canvasWidth, canvasHeight, selected, onSel
         <button
             type="button"
             onClick={() => onSelect(unit.id)}
-            className={`group absolute overflow-hidden rounded-[1.75rem] border px-4 py-3 text-left transition duration-200 ease-out hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-emerald-300/70 ${statusTone(unit.status, selected)}`}
+            className={`group absolute overflow-hidden rounded-[1.75rem] border px-3 py-2 text-left transition duration-200 ease-out hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-emerald-300/70 ${statusTone(unit.status, selected)}`}
             style={{
                 left: `${left}%`,
                 top: `${top}%`,
@@ -76,14 +117,14 @@ function PositionedUnitButton({ unit, canvasWidth, canvasHeight, selected, onSel
             }}
             aria-pressed={selected}
         >
-            <div className="flex h-full flex-col justify-between">
+            <div className="flex h-full flex-col gap-1">
                 <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] opacity-75">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.18em] opacity-75">
                         {toneLabel(unit.status)}
                     </p>
                     <h3 className="mt-1 text-sm font-black tracking-[0.08em]">{unit.code}</h3>
                 </div>
-                <p className="line-clamp-2 text-xs font-medium opacity-80">{unit.name}</p>
+                <p className="line-clamp-1 text-[11px] font-medium leading-4 opacity-80">{unit.name}</p>
             </div>
         </button>
     );
@@ -124,8 +165,7 @@ export default function UnitLayoutPicker({
     selectedUnitId,
     onSelect,
 }) {
-    const canvasWidth = service?.layout?.canvasWidth ?? 960;
-    const canvasHeight = service?.layout?.canvasHeight ?? 640;
+    const { canvasWidth, canvasHeight } = resolveManualCanvasSize(service, units, 960, 640);
     const selectedUnit = units.find((unit) => unit.id === selectedUnitId) ?? null;
     const usesManualLayout = hasManualLayout(service, units);
     const manualCanvasMinWidth = usesManualLayout
