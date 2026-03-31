@@ -35,6 +35,24 @@ function hasManualLayout(service, units) {
     return units.some((unit) => unit.layout?.x !== null && unit.layout?.y !== null);
 }
 
+function minimumManualCanvasWidth(units, canvasWidth) {
+    const minimumUnitWidth = 88;
+    const minimumUnitHeight = 72;
+
+    const scale = units.reduce((largestScale, unit) => {
+        const unitWidth = Math.max(unit.layout?.w ?? 180, 1);
+        const unitHeight = Math.max(unit.layout?.h ?? 110, 1);
+
+        return Math.max(
+            largestScale,
+            minimumUnitWidth / unitWidth,
+            minimumUnitHeight / unitHeight,
+        );
+    }, 1);
+
+    return Math.ceil(canvasWidth * scale);
+}
+
 function PositionedUnitButton({ unit, canvasWidth, canvasHeight, selected, onSelect }) {
     const width = unit.layout?.w ?? 180;
     const height = unit.layout?.h ?? 110;
@@ -110,6 +128,9 @@ export default function UnitLayoutPicker({
     const canvasHeight = service?.layout?.canvasHeight ?? 640;
     const selectedUnit = units.find((unit) => unit.id === selectedUnitId) ?? null;
     const usesManualLayout = hasManualLayout(service, units);
+    const manualCanvasMinWidth = usesManualLayout
+        ? minimumManualCanvasWidth(units, canvasWidth)
+        : canvasWidth;
 
     return (
         <section className="space-y-4">
@@ -145,30 +166,49 @@ export default function UnitLayoutPicker({
                 </div>
             ) : usesManualLayout ? (
                 <div className="space-y-4 rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_42%),linear-gradient(180deg,_rgba(24,24,27,0.94),_rgba(9,9,11,0.98))] p-4 shadow-[0_24px_80px_-40px_rgba(16,185,129,0.45)]">
+                    <div className="flex items-center justify-between gap-3 text-xs text-zinc-400 md:hidden">
+                        <p>Geser denah ke samping supaya ukuran unit tetap nyaman disentuh.</p>
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-semibold uppercase tracking-[0.18em] text-zinc-300">
+                            Swipe
+                        </span>
+                    </div>
+
                     <div
-                        className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900/80"
-                        style={{ aspectRatio: `${canvasWidth} / ${canvasHeight}` }}
+                        className="overflow-x-auto pb-2"
+                        role="region"
+                        aria-label="Denah unit yang bisa digeser horizontal pada layar kecil"
+                        tabIndex={0}
                     >
                         <div
-                            className="absolute inset-0 opacity-70"
-                            style={{
-                                backgroundImage:
-                                    'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-                                backgroundSize: '48px 48px',
-                            }}
-                        />
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,_rgba(16,185,129,0.22),_transparent_26%),radial-gradient(circle_at_80%_30%,_rgba(34,211,238,0.14),_transparent_22%)]" />
+                            className="min-w-full"
+                            style={{ minWidth: `${manualCanvasMinWidth}px` }}
+                        >
+                            <div
+                                className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-zinc-900/80"
+                                style={{ aspectRatio: `${canvasWidth} / ${canvasHeight}` }}
+                            >
+                                <div
+                                    className="absolute inset-0 opacity-70"
+                                    style={{
+                                        backgroundImage:
+                                            'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
+                                        backgroundSize: '48px 48px',
+                                    }}
+                                />
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,_rgba(16,185,129,0.22),_transparent_26%),radial-gradient(circle_at_80%_30%,_rgba(34,211,238,0.14),_transparent_22%)]" />
 
-                        {units.map((unit) => (
-                            <PositionedUnitButton
-                                key={unit.id}
-                                unit={unit}
-                                canvasWidth={canvasWidth}
-                                canvasHeight={canvasHeight}
-                                selected={selectedUnitId === unit.id}
-                                onSelect={onSelect}
-                            />
-                        ))}
+                                {units.map((unit) => (
+                                    <PositionedUnitButton
+                                        key={unit.id}
+                                        unit={unit}
+                                        canvasWidth={canvasWidth}
+                                        canvasHeight={canvasHeight}
+                                        selected={selectedUnitId === unit.id}
+                                        onSelect={onSelect}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-300">
