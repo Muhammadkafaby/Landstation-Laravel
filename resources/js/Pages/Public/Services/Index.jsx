@@ -6,8 +6,18 @@ const summaryLabels = [
     { key: 'units', label: 'Unit aktif' },
 ];
 
+const serviceTypeLabels = {
+    timed_unit: 'Sewa unit',
+    menu_only: 'Makan di tempat',
+};
+
+const billingTypeLabels = {
+    per_minute: 'Hitungan per jam',
+    flat: 'Harga flat',
+};
+
 const formatRupiah = (amount) => {
-    if (!amount) {
+    if (! amount) {
         return 'Info harga menyusul';
     }
 
@@ -111,7 +121,7 @@ export default function ServicesIndex({ summary, categories }) {
                                                         {service.name}
                                                     </h3>
                                                     <p className="mt-2 text-sm text-zinc-400">
-                                                        {service.serviceType} · {service.billingType}
+                                                        {serviceTypeLabels[service.serviceType] ?? service.serviceType} · {billingTypeLabels[service.billingType] ?? service.billingType}
                                                     </p>
                                                 </div>
 
