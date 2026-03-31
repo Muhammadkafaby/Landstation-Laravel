@@ -30,6 +30,26 @@ test('guests can access the public booking create page', function () {
         );
 });
 
+test('public booking create exposes preferred service when query parameter is valid', function () {
+    $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
+
+    $this->get(route('bookings.create', ['service' => $service->id]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Bookings/Create')
+            ->where('preferredServiceId', $service->id)
+        );
+});
+
+test('public booking create ignores preferred service query when service is not bookable', function () {
+    $this->get(route('bookings.create', ['service' => 999999]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Bookings/Create')
+            ->where('preferredServiceId', null)
+        );
+});
+
 test('guests can create a valid timed-service booking', function () {
     $service = Service::query()->where('code', 'ps-regular')->firstOrFail();
     $unit = ServiceUnit::query()->where('code', 'ps-01')->firstOrFail();

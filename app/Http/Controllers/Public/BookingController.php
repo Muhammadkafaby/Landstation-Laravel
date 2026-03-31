@@ -8,15 +8,32 @@ use App\Models\Booking;
 use App\Models\Service;
 use App\Services\Booking\BookingCreator;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BookingController extends Controller
 {
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        $serviceOptions = $this->serviceOptions(true);
+        $requestedServiceId = $request->filled('service')
+            ? $request->integer('service')
+            : null;
+
+        $preferredServiceId = null;
+
+        if (filled($requestedServiceId)) {
+            $preferredServiceId = collect($serviceOptions)
+                ->pluck('id')
+                ->contains($requestedServiceId)
+                ? $requestedServiceId
+                : null;
+        }
+
         return Inertia::render('Public/Bookings/Create', [
-            'serviceOptions' => $this->serviceOptions(true),
+            'serviceOptions' => $serviceOptions,
+            'preferredServiceId' => $preferredServiceId,
         ]);
     }
 

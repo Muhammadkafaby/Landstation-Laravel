@@ -44,6 +44,7 @@ class ServiceController extends Controller
                         ->min();
 
                     return [
+                        'id' => $service->id,
                         'slug' => $service->slug,
                         'code' => $service->code,
                         'name' => $service->name,

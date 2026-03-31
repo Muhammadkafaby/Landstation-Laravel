@@ -1,16 +1,18 @@
 export default function ApplicationLogo({ className = '' }) {
     return (
         <div className={`inline-flex items-center gap-3 ${className}`}>
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400 font-black text-zinc-950 shadow-lg shadow-emerald-500/20">
-                LS
+            <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-lime-300/40 bg-zinc-950 text-xs font-extrabold tracking-[0.18em] text-lime-200">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-lime-300 via-cyan-300 to-lime-300" />
+                <span className="relative">LS</span>
             </div>
+
             <div className="min-w-0">
-                <div className="truncate text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
+                <p className="truncate text-xs font-bold uppercase tracking-[0.24em] text-zinc-100">
                     Land Station
-                </div>
-                <div className="truncate text-xs text-zinc-400">
-                    Gaming · Billiard · RC · Cafe
-                </div>
+                </p>
+                <p className="truncate text-[11px] font-medium tracking-[0.06em] text-zinc-400">
+                    PS | RC | Billiard | Cafe
+                </p>
             </div>
         </div>
     );
