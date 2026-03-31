@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ServiceForm from '@/Pages/Admin/Services/Form';
+import LayoutEditor from '@/Pages/Admin/Services/LayoutEditor';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 function CategoryForm({ category, routeName, submitLabel }) {
@@ -676,6 +677,8 @@ export default function ServiceCatalogIndex({ categories, services, units, prici
                             ))}
                         </div>
                     </section>
+
+                    <LayoutEditor services={services} units={units} />
 
                     <section className="space-y-6">
                         <div>
