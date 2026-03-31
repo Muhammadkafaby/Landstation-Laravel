@@ -133,7 +133,7 @@ export default function UnitLayoutPicker({
         : canvasWidth;
 
     return (
-        <section className="space-y-4">
+        <section className="min-w-0 max-w-full space-y-4 overflow-hidden">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300/90">
@@ -165,7 +165,7 @@ export default function UnitLayoutPicker({
                     Belum ada unit yang tersedia untuk service ini.
                 </div>
             ) : usesManualLayout ? (
-                <div className="space-y-4 rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_42%),linear-gradient(180deg,_rgba(24,24,27,0.94),_rgba(9,9,11,0.98))] p-4 shadow-[0_24px_80px_-40px_rgba(16,185,129,0.45)]">
+                <div className="max-w-full space-y-4 rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_42%),linear-gradient(180deg,_rgba(24,24,27,0.94),_rgba(9,9,11,0.98))] p-4 shadow-[0_24px_80px_-40px_rgba(16,185,129,0.45)]">
                     <div className="flex items-center justify-between gap-3 text-xs text-zinc-400 md:hidden">
                         <p>Geser denah ke samping supaya ukuran unit tetap nyaman disentuh.</p>
                         <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-semibold uppercase tracking-[0.18em] text-zinc-300">
@@ -174,7 +174,7 @@ export default function UnitLayoutPicker({
                     </div>
 
                     <div
-                        className="overflow-x-auto pb-2"
+                        className="max-w-full overflow-x-auto overscroll-x-contain pb-2"
                         role="region"
                         aria-label="Denah unit yang bisa digeser horizontal pada layar kecil"
                         tabIndex={0}

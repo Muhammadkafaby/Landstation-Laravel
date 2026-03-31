@@ -34,9 +34,9 @@ export default function BookingForm({ serviceOptions, routeName, submitLabel }) 
     };
 
     return (
-        <form onSubmit={submit} className="space-y-5 rounded-3xl border border-white/10 bg-zinc-950/70 p-6">
+        <form onSubmit={submit} className="max-w-full space-y-5 overflow-x-hidden rounded-3xl border border-white/10 bg-zinc-950/70 p-6">
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-                <div className="space-y-5">
+                <div className="min-w-0 space-y-5">
                     <div className="grid gap-4 rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 md:grid-cols-2">
                         <div>
                             <InputLabel htmlFor={`${routeName}-service`} value="Service" />
@@ -114,7 +114,7 @@ export default function BookingForm({ serviceOptions, routeName, submitLabel }) 
                     <InputError className="mt-2" message={errors.service_unit_id} />
                 </div>
 
-                <div className="space-y-4 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(24,24,27,0.92),_rgba(9,9,11,0.98))] p-5">
+                <div className="min-w-0 space-y-4 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(24,24,27,0.92),_rgba(9,9,11,0.98))] p-5">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300/90">
                             Data Pemesan
