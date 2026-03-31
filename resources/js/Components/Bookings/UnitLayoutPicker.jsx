@@ -48,7 +48,7 @@ function minimumManualCanvasWidth(units, canvasWidth) {
             minimumUnitWidth / unitWidth,
             minimumUnitHeight / unitHeight,
         );
-    }, 1);
+    }, 0);
 
     return Math.ceil(canvasWidth * scale);
 }
